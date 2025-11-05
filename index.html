@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Horarios de Directos | New Brothers Studios</title>
+<style>
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(135deg, #000000, #ff6600);
+    color: white;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 2em;
+    margin: 20px 0;
+  }
+
+  .country-select {
+    text-align: center;
+    margin-top: 60px;
+  }
+
+  .country-select button {
+    background: #ff6600;
+    border: none;
+    color: white;
+    padding: 12px 20px;
+    border-radius: 12px;
+    margin: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .country-select button:hover {
+    background: #ffaa33;
+    transform: scale(1.05);
+  }
+
+  .container {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    padding: 20px;
+  }
+
+  .card {
+    background: rgba(30, 30, 30, 0.9);
+    border: 2px solid #ff6600;
+    border-radius: 15px;
+    padding: 20px;
+    width: 90%;
+    max-width: 500px;
+    box-shadow: 0 0 10px #ff6600;
+    transition: transform 0.3s ease;
+  }
+
+  .card:hover {
+    transform: scale(1.03);
+  }
+
+  .time {
+    color: #ffaa33;
+    font-weight: bold;
+  }
+
+  .countdown {
+    font-size: 1em;
+    margin-top: 5px;
+  }
+
+  .watch-btn {
+    display: none;
+    margin-top: 10px;
+    background: #ff6600;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 1em;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .watch-btn:hover {
+    background: #ffaa33;
+  }
+
+  .support {
+    text-align: center;
+    margin-top: 50px;
+  }
+
+  .support button {
+    background: #222;
+    color: #ff6600;
+    border: 2px solid #ff6600;
+    border-radius: 12px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: 0.3s;
+  }
+
+  .support button:hover {
+    background: #ff6600;
+    color: #fff;
+  }
+
+  .support-panel {
+    display: none;
+    background: rgba(20,20,20,0.95);
+    border: 2px solid #ff6600;
+    border-radius: 10px;
+    margin: 15px auto;
+    padding: 15px;
+    width: 80%;
+    max-width: 400px;
+  }
+
+  .support-panel button {
+    background: #ff6600;
+    border: none;
+    color: white;
+    padding: 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    width: 100%;
+  }
+
+  .support-panel button:hover {
+    background: #ffaa33;
+  }
+</style>
+</head>
+<body>
+
+<h1>New Brothers Studios 🎮</h1>
+
+<div class="country-select" id="countrySelect">
+  <h2>¿De qué país eres?</h2>
+  <button onclick="selectCountry('sv')">🇸🇻 El Salvador</button>
+  <button onclick="selectCountry('gt')">🇬🇹 Guatemala</button>
+  <button onclick="selectCountry('ar')">🇦🇷 Argentina</button>
+  <button onclick="selectCountry('us')">🇺🇸 Estados Unidos</button>
+  <button onclick="selectCountry('ni')">🇳🇮 Nicaragua</button>
+  <button onclick="selectCountry('hn')">🇭🇳 Honduras</button>
+</div>
+
+<div class="container" id="mainContainer">
+  <h2>Horarios de Directos 🔥</h2>
+</div>
+
+<div class="support">
+  <button onclick="toggleSupport()">💬 Soporte Técnico</button>
+  <div class="support-panel" id="supportPanel">
+    <p>1️⃣ ¿Necesitas ayuda?<br>Política de privacidad aún no disponible</p>
+    <p>2️⃣ ¿No estamos en directo?</p>
+    <button onclick="contactar()">Contactanos</button>
+  </div>
+</div>
+
+<script>
+const tiktokLink = "https://www.tiktok.com/@andersxn503?_r=1&_d=ekjhc2l1lj009d&sec_uid=MS4wLjABAAAANslxDGeL8ZJGseJACO_bzBgBDa97GDQPUc0gkQ1-OZOi30m9Xnpyt5f6-4lhLTVJ";
+
+const horarios = [
+  { dia: "Miércoles (5 nov)", hora: "16:10", titulo: "Trades 🔥" },
+  { dia: "Jueves (6 nov)", hora: "16:00", titulo: "PVPs y Trades 🔥" },
+  { dia: "Viernes (7 nov)", hora: "16:30", titulo: "Trades 🔥" },
+  { dia: "Sábado (8 nov)", hora: "14:30", titulo: "Trades 🔥" },
+  { dia: "Domingo (9 nov)", hora: "11:00", titulo: "PVPs y Trades 🔥" },
+  { dia: "Domingo (9 nov)", hora: "15:00", titulo: "PVPs y Trades 🔥" }
+];
+
+const offsets = {
+  sv: 0,  // El Salvador (base)
+  gt: 0,
+  hn: 0,
+  ni: 0,
+  us: +1,
+  ar: +3
+};
+
+function selectCountry(country) {
+  document.getElementById("countrySelect").style.display = "none";
+  const main = document.getElementById("mainContainer");
+  main.style.display = "flex";
+  main.innerHTML = "<h2>Horarios de Directos 🔥</h2>";
+
+  horarios.forEach(h => {
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const timeText = document.createElement("div");
+    timeText.className = "time";
+    timeText.textContent = `${h.dia} • ${h.hora} hrs`;
+
+    const countdown = document.createElement("div");
+    countdown.className = "countdown";
+    countdown.textContent = "Cargando...";
+
+    const btn = document.createElement("button");
+    btn.className = "watch-btn";
+    btn.textContent = "IR A VER!";
+    btn.onclick = () => window.open(tiktokLink, "_blank");
+
+    card.innerHTML = `<h3>${h.titulo}</h3>`;
+    card.appendChild(timeText);
+    card.appendChild(countdown);
+    card.appendChild(btn);
+    main.appendChild(card);
+
+    iniciarContador(h.hora, countdown, btn, offsets[country]);
+  });
+}
+
+function iniciarContador(hora, elemento, boton, offset) {
+  const [h, m] = hora.split(":").map(Number);
+
+  function actualizar() {
+    const ahora = new Date();
+    const evento = new Date();
+    evento.setHours(h + offset, m, 0, 0);
+
+    if (evento < ahora) evento.setDate(evento.getDate() + 7);
+
+    const diferencia = evento - ahora;
+    if (diferencia <= 0) {
+      elemento.textContent = "¡En vivo ahora!";
+      boton.style.display = "inline-block";
+      return;
+    }
+
+    const horas = Math.floor(diferencia / (1000 * 60 * 60));
+    const minutos = Math.floor((diferencia / (1000 * 60)) % 60);
+    const segundos = Math.floor((diferencia / 1000) % 60);
+
+    elemento.textContent = `En ${horas}h ${minutos}m ${segundos}s`;
+  }
+
+  actualizar();
+  setInterval(actualizar, 1000);
+}
+
+function toggleSupport() {
+  const panel = document.getElementById("supportPanel");
+  panel.style.display = panel.style.display === "block" ? "none" : "block";
+}
+
+function contactar() {
+  const fecha = new Date();
+  const opciones = { weekday: 'long', hour: '2-digit', minute: '2-digit' };
+  const formato = fecha.toLocaleString('es-SV', opciones);
+  const mensaje = `Porque no están en directo y (${formato})`;
+  window.open(`https://wa.me/50373826693?text=${encodeURIComponent(mensaje)}`);
+}
+</script>
+</body>
+</html>
