@@ -3,349 +3,457 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Poppy Playtime CHAPTER 4 — Demo Real-Time</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Creepster&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<meta name="google-site-verification" content="7IGGioxLL0FSkhq5319O2gWT4PCtA4Q1c3MR2zk1Xtc" />
+<title>Bobux — Tienda</title>
 
 <style>
-  :root{
-    --bg:#071018; --panel:#0f1720; --accent:#1eb980; --muted:#98a0aa;
-  }
-  *{box-sizing:border-box}
-  html,body{height:100%;margin:0;font-family:Inter,system-ui,Segoe UI,Roboto,Arial;background:linear-gradient(180deg,#041018,#071018);}
-  .center{max-width:980px;margin:28px auto;padding:18px}
-  .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border-radius:12px;padding:18px;border:1px solid rgba(255,255,255,0.03);color:#eaf4fb}
-  .header{display:flex;align-items:center;gap:16px}
-  .logo{width:120px;height:120px;border-radius:12px;background:linear-gradient(180deg,#0b1116,#071018);display:flex;align-items:center;justify-content:center;font-family:"Creepster",cursive;font-size:34px}
-  h1{margin:0;font-size:20px}
-  .studio{color:var(--muted);font-size:13px;margin-top:6px}
-  .desc{color:var(--muted);margin-top:12px;line-height:1.5}
+/* -------------------------
+   RESET Y BASE
+------------------------- */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{
+  font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+  background:linear-gradient(180deg,#2a1400 0%, #100700 100%);
+  color:#BBDEFB;
+  -webkit-font-smoothing:antialiased;
+  -moz-osx-font-smoothing:grayscale;
+  padding-top:88px;
+  overflow-x:hidden;
+  text-align:center;
+}
 
-  /* Sticky download bar */
-  .download-bar{position:fixed;left:50%;transform:translateX(-50%);bottom:18px;max-width:980px;width:calc(100% - 36px);background:linear-gradient(180deg,#071018,#041018);border-radius:12px;padding:14px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 12px 36px rgba(0,0,0,0.6);display:flex;align-items:center;gap:14px;z-index:90}
-  .info{flex:1}
-  .title{font-weight:800}
-  .estimate{color:var(--muted);font-size:13px;margin-top:6px}
-  .progress{height:14px;background:rgba(255,255,255,0.04);border-radius:999px;overflow:hidden;margin-top:10px;border:1px solid rgba(0,0,0,0.25)}
-  .bar{height:100%;width:0;background:linear-gradient(90deg, rgba(30,185,128,0.18), rgba(30,185,128,0.6));transition:width 400ms linear}
-  .pct{width:72px;text-align:right;font-weight:700;color:#eaf4fb}
-  .download-btn{background:linear-gradient(180deg,var(--accent),#16a66b);border:none;padding:12px 16px;border-radius:10px;font-weight:800;color:white;cursor:pointer;display:flex;align-items:center;gap:8px;position:relative;overflow:visible}
-  .pulse{animation:btnPulse 1.6s ease-in-out infinite}
-  @keyframes btnPulse{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+/* Top bar */
+.top-bar{
+  position:fixed;top:0;left:0;width:100%;
+  background:linear-gradient(90deg, rgba(255,160,0,0.98), rgba(255,110,0,0.95));
+  padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
+  color:#C8E6C9;z-index:140;border-bottom:3px solid rgba(255,140,0,0.14);
+  box-shadow:0 6px 24px rgba(0,0,0,0.45);
+  transform:translateY(-8px);
+  animation:barDrop .6s cubic-bezier(.2,.9,.3,1) forwards;
+}
+@keyframes barDrop{to{transform:translateY(0)}}
 
-  /* Fullscreen overlays */
-  .overlay{position:fixed;inset:0;background:rgba(3,6,10,0.86);display:flex;align-items:center;justify-content:center;z-index:120;flex-direction:column;color:#fff;padding:24px;text-align:center}
-  .overlay h2{font-family:"Creepster",cursive;font-size:44px;margin-bottom:12px}
-  .overlay .sub{font-size:18px;color:var(--muted)}
-  .big-note{position:fixed;left:16px;top:16px;background:#15181a;padding:10px 12px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);color:#ffd9d9;z-index:130;font-weight:700}
+/* Header */
+header{margin-top:6px;padding:8px 12px}
+h1{
+  font-size:2.0rem;
+  color:#ff44336;
+  letter-spacing:0.6px;
+  text-shadow:0 6px 18px rgba(255,150,0,0.12),0 0 22px rgba(255,200,50,0.06);
+  animation:glowText 2.4s ease-in-out infinite alternate;
+}
+@keyframes glowText{
+  from{text-shadow:0 6px 18px rgba(255,140,0,0.12),0 0 14px rgba(255,180,50,0.04)}
+  to{text-shadow:0 12px 30px rgba(255,180,0,0.18),0 0 36px rgba(255,220,90,0.08)}
+}
+h2{color:#ffe9b3;font-weight:500;margin-top:6px;font-size:1rem}
 
-  /* small toast */
-  .toast{position:fixed;right:18px;bottom:120px;background:rgba(20,20,20,0.95);padding:10px 14px;color:#dff8ea;border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,0.6);z-index:200}
+/* Layout container */
+.container{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;padding:20px;max-width:1100px;margin:8px auto}
 
-  @media (max-width:720px){
-    .logo{width:88px;height:88px}
-    .overlay h2{font-size:32px}
-    .download-bar{padding:12px}
-    .pct{display:none}
-  }
+/* CARD */
+.card{
+  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  width:94%;
+  max-width:420px;
+  border-radius:18px;
+  padding:18px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  box-shadow:0 10px 34px rgba(0,0,0,0.6), inset 0 -4px 18px rgba(255,140,0,0.03);
+  transition:transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .28s;
+  will-change:transform;
+  overflow:hidden;
+  position:relative;
+  border:1px solid rgba(255,170,0,0.08);
+  transform:translateY(10px);
+  animation:cardIn .6s ease forwards;
+}
+@keyframes cardIn{to{transform:translateY(0)}}
+.card::before{
+  content:"";
+  position:absolute;left:-40%;top:-40%;width:120%;height:120%;
+  background:radial-gradient(circle at 10% 10%, rgba(255,215,120,0.08), transparent 10%),
+             radial-gradient(circle at 90% 90%, rgba(255,120,50,0.06), transparent 10%);
+  transform:scale(1.05);
+  pointer-events:none;
+}
+.card:hover{transform:translateY(-10px) scale(1.02); box-shadow:0 22px 50px rgba(255,150,0,0.16)}
+
+.robux-title{font-size:1.35rem;color:#E1BEE7; margin-bottom:8px; font-weight:700; text-shadow:0 4px 18px rgba(255,170,0,0.06)}
+.price-row{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
+.price{font-weight:800;color:#388E3C;font-size:1.15rem}
+.price-bar{
+  width:92%;height:12px;border-radius:10px;
+  background:linear-gradient(90deg,#ffd54f,#ff8a00);
+  margin-top:10px;
+  box-shadow:0 6px 30px rgba(255,140,0,0.12) inset;
+  position:relative;
+  overflow:hidden;
+}
+.price-bar::after{
+  content:"";position:absolute;left:-30%;top:0;width:50%;height:100%;
+  background:linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0));
+  transform:skewX(-18deg);
+  animation:barShine 2.2s linear infinite;
+}
+@keyframes barShine{to{left:120%}}
+
+.btn{
+  margin-top:14px;padding:16px 26px;font-size:1.05rem;border-radius:999px;border:none;cursor:pointer;
+  background:linear-gradient(90deg,#ffcf5e,#ff7d00);color:#E8F5E9;font-weight:800;
+  box-shadow:0 10px 30px rgba(255,140,0,0.22), 0 2px 6px rgba(0,0,0,0.18);
+  transition:transform .18s, box-shadow .18s;
+  letter-spacing:0.4px;
+}
+.btn:active{transform:translateY(2px) scale(.995)}
+.btn.hoverPulse{animation:pulse 1.8s infinite}
+@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+
+.small{font-size:.98rem;color:#ffe9b3;margin-top:10px}
+
+/* Overlays */
+#overlayLoad,#overlayPay{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.7));z-index:260}
+.modal{background:linear-gradient(180deg,#3b1800,#2a1200);border-radius:16px;padding:18px; width:94%;max-width:560px;color:#fff8e5;box-shadow:0 20px 60px rgba(0,0,0,0.7);border:2px solid rgba(255,170,0,0.18);transform:translateY(18px);animation:modalIn .48s cubic-bezier(.2,.9,.3,1) forwards}
+@keyframes modalIn{to{transform:translateY(0)}}
+
+/* -------------------------
+   BURBUJA FLOTANTE
+------------------------- */
+#floatingBubble{
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  background: gold;
+  box-shadow: 0 0 18px rgba(255,215,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  animation: bubbleFloat 3s infinite ease-in-out;
+  z-index: 99999;
+  font-size: 30px;
+}
+
+/* Anim burbuja */
+@keyframes bubbleFloat {0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
+
+/* -------------------------
+   RULETA (overlay)
+------------------------- */
+#wheelContainer{
+  position: fixed;
+  top:0;left:0;width:100%;height:100%;
+  background: rgba(120,0,0,0.88);
+  display:none;justify-content:center;align-items:center;flex-direction:column;padding:20px;z-index:100000;
+}
+#closeWheel{position:absolute;top:15px;right:15px;background:black;color:white;padding:10px 15px;border-radius:10px;cursor:pointer;z-index:200000}
+#wheelBox{background:#ffb3b3;padding:20px;border-radius:20px;text-align:center;width:90%;max-width:430px;position:relative;animation:popIn .4s ease}
+@keyframes popIn{0%{transform:scale(0.6);opacity:0}100%{transform:scale(1);opacity:1}}
+
+/* Ruleta */
+#wheel{width:300px;height:300px;border-radius:50%;border:10px solid gold;box-shadow:0 0 15px gold,inset 0 0 20px rgba(255,215,0,0.7);margin:0 auto;display:block}
+#pointer{position:absolute;right:-40px;top:50%;transform:translateY(-50%);font-size:55px;font-weight:bold;color:red;text-shadow:0 0 6px black}
+
+/* Scroll area and boxes */
+#scrollArea{margin-top:20px;height:230px;overflow-y:scroll;padding-right:10px}
+.buyBox{background:#0057ff;border:2px solid yellow;border-radius:12px;padding:10px;text-align:center;color:yellow;margin-bottom:15px;animation:zoomLoop 4s infinite ease-in-out;cursor:pointer}
+@keyframes zoomLoop{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
+.buyBox span{display:block;font-weight:bold}
+
+/* VIP */
+.vip-container{position: absolute; top: 70px; right: 10px; text-align:center; z-index:999}
+.vip-new{font-size:10px;color:#007bff;font-weight:bold}
+.vip-circle{width:55px;height:55px;background:gold;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;animation:vipPulse 1.6s infinite ease-in-out;box-shadow:0 0 8px rgba(0,0,0,0.2)}
+.vip-text{font-size:20px;font-weight:bold;color:black}
+@keyframes vipPulse{0%{transform:scale(1)}50%{transform:scale(1.13)}100%{transform:scale(1)}}
+
+/* VIP modal */
+.vip-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);display:none;justify-content:center;align-items:center;padding:20px;z-index:9999}
+.vip-content{background:#0e355e;padding:20px;border-radius:12px;width:85%;max-width:320px;text-align:center;color:#9aff9a;animation:slideFade .55s ease}
+@keyframes slideFade{0%{opacity:0;transform:translateY(40px) scale(.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
+.vip-subscribe{background:#28a745;color:white;border:none;padding:12px 18px;border-radius:10px;font-size:15px;margin-top:10px;cursor:pointer;width:100%;font-weight:bold}
+.vip-close{margin-top:15px;background:#007bff;color:white;border:none;padding:10px 18px;border-radius:10px;cursor:pointer;width:100%}
+
+/* Responsive tweaks */
+@media(min-width:800px){
+  .container{padding:28px}
+  .card{width:260px}
+}
 </style>
 </head>
 <body>
 
-<div class="center">
+<!-- TOP BAR -->
+<div class="top-bar" role="banner">
+  <div>🔥<strong>nueva ruleta por tiempo limitado!!!</strong></div>
+  <div id="serverCount" aria-live="polite">estamos trabajando en nuestra traducción a ingles!.</div>
+</div>
+
+<header>
+  <h1>Bobux</h1>
+  <h2>Versión 2.8 — Ruleta de la suerte</h2>
+  <p class="small">Sigue las instrucciones de pago que aparecen al comprar.</p>
+</header>
+
+<main class="container" id="paquetes">
+  <!-- Paquetes (cada botón usa enviarWhatsApp para mensaje pre-escrito) -->
   <div class="card">
-    <div class="header">
-      <div class="logo">PP4</div>
-      <div>
-        <h1>POPPY PLAYTIME CHAPTER 4</h1>
-        <div class="studio">ANDZXX &amp; NEW BROTHERS STUDIOS</div>
-        <div class="estimate">Adventure • Horror • Single Player</div>
+    <div class="robux-title">⏣ 40 robux</div>
+    <div class="price-row"><div class="price">$0.65</div><div class="price-bar" aria-hidden="true"></div></div>
+    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 40 Robux por $0.65')">Comprar</button>
+    <div class="small">-5% descuento</div>
+  </div>
+
+  <div class="card">
+    <div class="robux-title">⏣ 80 robux</div>
+    <div class="price-row"><div class="price">$1.25</div><div class="price-bar"></div></div>
+    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 80 Robux por $1.25')">Comprar</button>
+    <div class="small">-5% descuento</div>
+  </div>
+
+  <div class="card">
+    <div class="robux-title">⏣ 400 robux</div>
+    <div class="price-row"><div class="price">$5.75</div><div class="price-bar"></div></div>
+    <button class="btn hoverPulse" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 400 Robux por $5.75')">Comprar</button>
+    <div class="small">-5% descuento</div>
+  </div>
+
+  <div class="card">
+    <div class="robux-title">⏣ 800 robux</div>
+    <div class="price-row"><div class="price">$10.99</div><div class="price-bar"></div></div>
+    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 800 Robux por $10.99')">Comprar</button>
+    <div class="small">-5% descuento</div>
+  </div>
+
+  <div class="card">
+    <div class="robux-title">⏣ 1000 robux</div>
+    <div class="price-row"><div class="price">$14.99</div><div class="price-bar"></div></div>
+    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 1000 Robux por $14.99')">Comprar</button>
+    <div class="small">Paquete PREMIUM</div>
+  </div>
+
+  <div class="card">
+    <div class="robux-title">⏣ Paquete Secreto</div>
+    <div class="price-row"><div class="price">$20.00</div><div class="price-bar"></div></div>
+    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el Paquete Secreto por $20.00')">Comprar</button>
+    <div class="small">Accesible con Key</div>
+  </div>
+<!-- Membresías -->
+  <section class="memberships" aria-labelledby="membersTitle">
+    <h3 id="membersTitle" style="color:#ffdca8;margin-bottom:10px">MEBRESIAS ESPECIALES</h3>
+    <div class="container" style="gap:12px;">
+      <div class="card">
+        <div class="robux-title">Membresía 4 días — +25% robux</div>
+        <div class="price-row">
+          <div class="price">$1.99</div>
+          <div class="price-bar"></div>
+        </div>
+        <button class="btn" onclick="iniciarCompra('Membresía 4 días +25%',1.99)">Suscribirse</button>
+        <div class="small">extra robux en paquetes</div>
+      </div>
+
+      <div class="card">
+        <div class="robux-title">Membresía 8 días — +25% robux</div>
+        <div class="price-row">
+          <div class="price">$2.99</div>
+          <div class="price-bar"></div>
+        </div>
+        <button class="btn" onclick="iniciarCompra('Membresía 8 días +25%',2.99)">Suscribirse</button>
+        <div class="small">extra robux en paquetes</div>
+      </div>
+
+      <div class="card">
+        <div class="robux-title">Membresía 15 días — +25% robux</div>
+        <div class="price-row">
+          <div class="price">$4.99</div>
+          <div class="price-bar"></div>
+        </div>
+        <button class="btn" onclick="iniciarCompra('Membresía 15 días +25%',4.99)">Suscribirse</button>
+        <div class="small">Extra robux en paquetes!</div>
       </div>
     </div>
+  </section>
 
-    <p class="desc">
-      This demo reproduces a real-time download + install sequence exactly as specified. 
-      <strong>No se salgan de la página</strong> — if you leave the tab or navigate away, the download will be invalidated.
-    </p>
-  </div>
-</div>
-
-<!-- Sticky download bar -->
-<div class="download-bar" role="region" aria-label="Download bar">
-  <div class="info">
-    <div class="title">POPPY PLAYTIME CHAPTER 4</div>
-    <div class="estimate" id="estimateText">Ready to download</div>
-
-    <div class="progress" id="progressWrap" style="display:block">
-      <div class="bar" id="progressBar" style="width:0%"></div>
+  <!-- Key / Encuesta -->
+  <section style="max-width:940px;margin:12px auto;padding:12px">
+    <div class="key-survey" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
+      <div style="text-align:left;min-width:260px">
+        <h4>🔐 Ingresa tu key secreta</h4>
+        <input id="keyInput" type="text" placeholder="Tu key aquí" aria-label="Key secreta">
+        <div style="margin-top:10px">
+          <button class="btn" onclick="checkKey()">Validar</button>
+        </div>
+      </div>
+      <div style="min-width:260px;text-align:left">
+        <h4>🗳️ Encuesta</h4>
+        <p class="small">¿Quieres que traigamos más paquetes?</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button class="ghost" onclick="vote('100 robux')">100 robux</button>
+          <button class="ghost" onclick="vote('250 robux')">250 robux</button>
+          <button class="ghost" onclick="vote('600 robux')">600 robux</button>
+        </div>
+        <p id="voteResult" class="voteResult"></p>
+      </div>
     </div>
+  </section>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
-      <div id="statusText" style="color:var(--muted);font-size:13px">Waiting</div>
-      <div style="display:flex;gap:8px;align-items:center">
-        <div id="timeLeft" style="color:var(--muted);font-size:13px">—</div>
-        <div class="pct" id="pct">0%</div>
+  <!-- Overlay carga -->
+  <div id="overlayLoad" aria-hidden="true">
+    <div style="display:flex;flex-direction:column;align-items:center">
+      <div class="spinner" role="status" aria-label="Cargando"></div>
+      <div style="color:#ffeccf;margin-top:10px;font-weight:700">Cargando…</div>
+    </div>
+  </div>
+
+  <!-- Modal instrucciones PayPal -->
+  <div id="overlayPay" aria-hidden="true">
+    <div class="modal" role="dialog" aria-modal="true">
+      <h3>💳 MÉTODO DE PAGO</h3>
+
+      <div class="instruction" id="instLine1">
+        ➡️ Entra a PayPal y agrega este correo: <strong style="color:#ffd76a">gato41959@gmail.com</strong>
+      </div>
+
+      <div class="instruction" id="instLine2">
+        💵 Cantidad a depositar: <strong id="instAmount" style="color:#ffd76a">—</strong><br>
+        <small style="color:#ffdca8">(Si pones más o menos que la cantidad indicada, tu pago no será válido)</small>
+      </div>
+
+      <div class="instruction" id="instLine3">
+        📩 Recibirás un mensaje a tu correo. Por favor deja tu Gmail en la descripción del depósito.
+      </div>
+
+      <div id="instExtra" style="margin-top:6px;color:#ffdca8">Puedes copiar estas instrucciones y luego entrar a PayPal para hacer el depósito manualmente.</div>
+
+      <div class="actions" style="margin-top:12px">
+        <button class="copyBtn" onclick="copiarInstrucciones()">Copiar instrucciones</button>
+        <button class="ghost" onclick="abrirPayPal()">🔵 Abrir PayPal</button>
+        <button class="ghost" onclick="pagarEfectivo()">💚 Pagar en Efectivo (WhatsApp)</button>
+        <button class="ghost" onclick="cerrarPayModal()">Cerrar</button>
       </div>
     </div>
   </div>
 
-  <div>
-    <div class="pulse">
-      <button id="downloadBtn" class="download-btn" aria-pressed="false" title="Descargar ¡DESCARGAR!">
-        <!-- icon -->
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 3v12" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><path d="M8 11l4 4 4-4" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        ¡DESCARGAR!
-      </button>
-    </div>
-  </div>
-</div>
-
-<!-- Big fixed warning (do not leave) -->
-<div class="big-note" id="stayNote">📃 NO SALIR DE LA PÁGINA — Si sales, la descarga no será válida</div>
-
-<!-- Overlays (hidden by default) -->
-<div id="fullOverlay" class="overlay" style="display:none">
-  <h2 id="overlayTitle">¡DESCARGA COMPLETADA!</h2>
-  <div class="sub" id="overlaySub">Success</div>
-</div>
-
-<!-- Secondary small overlay used for install/failed messages -->
-<div id="smallOverlay" class="overlay" style="display:none;align-items:center;justify-content:center;gap:12px">
-  <div style="font-size:20px;font-weight:700" id="smallText">INSTALANDO ARCHIVOS...</div>
-  <div id="smallHint" style="color:var(--muted);font-size:14px">Por favor espere — esto tarda 5 minutos</div>
-</div>
-
-<!-- Toast holder -->
-<div id="toastHolder"></div>
+  <footer>© 2025 New Brothers Studios LLC — NOHEMXS</footer>
 
 <script>
-/* ========== Config (real durations in seconds) ========== */
-const OUTCOMES = [
-  {prob:0.6, label:"Estimated: 4h", seconds: 4 * 3600},
-  {prob:0.2, label:"Estimated: 2h 30m", seconds: 2.5 * 3600},
-  {prob:0.2, label:"Estimated: 5h", seconds: 5 * 3600},
-];
-const FULLSCREEN_COMPLETE_MS = 4000; // 4 seconds display of "¡DESCARGA COMPLETADA!"
-const INSTALL_MS = 5 * 60 * 1000; // 5 minutes in ms for "INSTALANDO ARCHIVOS..."
-/* ========== End config ========== */
+  /* --- Datos de contacto (mantener los que tenías) --- */
+  const SELLER_PAYPAL = 'gato41959@gmail.com';
+  const WHATSAPP_PHONE = '50373826693'; // sin signos
+  let compra = { item: '', amount: 0 };
 
-const btn = document.getElementById('downloadBtn');
-const progressBar = document.getElementById('progressBar');
-const pct = document.getElementById('pct');
-const statusText = document.getElementById('statusText');
-const estimateText = document.getElementById('estimateText');
-const timeLeft = document.getElementById('timeLeft');
-
-const fullOverlay = document.getElementById('fullOverlay');
-const overlayTitle = document.getElementById('overlayTitle');
-const overlaySub = document.getElementById('overlaySub');
-const smallOverlay = document.getElementById('smallOverlay');
-const smallText = document.getElementById('smallText');
-const smallHint = document.getElementById('smallHint');
-
-let downloadState = null; // null or object with state
-let raf = null;
-
-// Choose weighted random
-function chooseWeighted(arr){
-  const r = Math.random();
-  let acc = 0;
-  for (const it of arr){
-    acc += it.prob;
-    if (r <= acc) return it;
-  }
-  return arr[arr.length-1];
-}
-
-// Simple toast
-function showToast(text){
-  const t = document.createElement('div');
-  t.className = 'toast';
-  t.textContent = text;
-  document.body.appendChild(t);
-  setTimeout(()=> t.style.opacity = '1', 20);
-  setTimeout(()=> { t.style.opacity = '0'; setTimeout(()=> t.remove(), 360); }, 3000);
-}
-
-// Format seconds to H:MM:SS or M:SS
-function formatHMS(sec){
-  sec = Math.max(0, Math.floor(sec));
-  const h = Math.floor(sec / 3600);
-  const m = Math.floor((sec % 3600) / 60);
-  const s = sec % 60;
-  if (h > 0) return `${h}h ${String(m).padStart(2,'0')}m ${String(s).padStart(2,'0')}s`;
-  return `${m}m ${String(s).padStart(2,'0')}s`;
-}
-
-// Cancel and invalidate download (called when user leaves tab or reloads)
-function invalidateDownload(reason){
-  if(!downloadState) return;
-  cancelAnimationFrame(raf);
-  downloadState = { status: 'invalidated', reason };
-  progressBar.style.width = '0%';
-  pct.textContent = '0%';
-  statusText.textContent = 'Download invalidated';
-  estimateText.textContent = 'DESCARGA INVALIDADA';
-  timeLeft.textContent = '—';
-  showOverlayTemporary(`DESCARGA INVALIDADA`, `${reason}`, 4000);
-}
-
-// Show overlay (full) with message for given ms
-function showOverlayTemporary(title, sub, ms){
-  overlayTitle.textContent = title;
-  overlaySub.textContent = sub;
-  fullOverlay.style.display = 'flex';
-  setTimeout(()=> fullOverlay.style.display = 'none', ms);
-}
-
-// Start download process (real-time)
-btn.addEventListener('click', () => {
-  if (downloadState && (downloadState.status === 'running' || downloadState.status === 'installing')) {
-    // already running
-    showToast('Descarga en progreso');
-    return;
+  /* --- iniciar compra: animación de carga, luego modal --- */
+  function iniciarCompra(item, priceNumber){
+    compra.item = item;
+    compra.amount = Number(priceNumber) || 0;
+    // mostrar overlay carga breve
+    document.getElementById('overlayLoad').style.display = 'flex';
+    if(navigator.vibrate) navigator.vibrate(40);
+    setTimeout(()=>{
+      document.getElementById('overlayLoad').style.display = 'none';
+      // actualizar modal monto
+      const formatted = '$' + (compra.amount||0).toFixed(2);
+      document.getElementById('instAmount').innerText = formatted;
+      // mostrar modal instrucciones con efecto
+      const overlay = document.getElementById('overlayPay');
+      overlay.style.display = 'flex';
+      overlay.setAttribute('aria-hidden','false');
+      // pequeño rebote en modal
+      const modal = overlay.querySelector('.modal');
+      modal.style.transform = 'translateY(-8px) scale(0.98)';
+      modal.style.opacity = '0';
+      setTimeout(()=>{ modal.style.transition = 'transform .36s cubic-bezier(.2,.9,.3,1), opacity .36s'; modal.style.transform = 'translateY(0) scale(1)'; modal.style.opacity='1'; },20);
+      // scroll to top for mobile
+      window.scrollTo({top:0,behavior:'smooth'});
+    },700);
   }
 
-  // pick outcome (for time display) — attempts always end as failed after install
-  const pick = chooseWeighted(OUTCOMES);
+  function cerrarPayModal(){
+    const overlay = document.getElementById('overlayPay');
+    const modal = overlay.querySelector('.modal');
+    modal.style.transition = 'transform .22s ease, opacity .22s';
+    modal.style.transform = 'translateY(12px) scale(.98)';
+    modal.style.opacity = '0';
+    setTimeout(()=>{ overlay.style.display = 'none'; overlay.setAttribute('aria-hidden','true'); modal.style.transform=''; modal.style.opacity=''; },220);
+  }
 
-  // Initialize state
-  const now = Date.now();
-  downloadState = {
-    status: 'running',         // running -> completed -> installing -> failed
-    pick,
-    startTime: now,
-    totalSeconds: pick.seconds, // in seconds
-    endTime: now + Math.round(pick.seconds * 1000),
-    invalidated: false
-  };
-
-  estimateText.textContent = pick.label;
-  statusText.textContent = 'Downloading...';
-  showToast('Descarga iniciada — NO SALIR DE LA PÁGINA');
-
-  // start RAF loop which computes based on real time (Date.now())
-  function tick(){
-    if(!downloadState || downloadState.status !== 'running') return;
-    const now = Date.now();
-    const elapsedMs = now - downloadState.startTime;
-    const totalMs = downloadState.totalSeconds * 1000;
-    let progress = Math.min(1, elapsedMs / totalMs);
-    const percent = Math.floor(progress * 100);
-    progressBar.style.width = percent + '%';
-    pct.textContent = percent + '%';
-
-    const remainingSec = Math.ceil((1 - progress) * downloadState.totalSeconds);
-    timeLeft.textContent = formatHMS(remainingSec);
-
-    // If progress reached 100%
-    if (progress >= 1){
-      // finalize download -> show completed overlay for 4s
-      downloadState.status = 'completed';
-      progressBar.style.width = '100%';
-      pct.textContent = '100%';
-      statusText.textContent = 'Download complete';
-      timeLeft.textContent = '0m 00s';
-
-      // Show full-screen completed for 4s
-      fullOverlay.style.display = 'flex';
-      overlayTitle.textContent = '¡DESCARGA COMPLETADA!';
-      overlaySub.textContent = 'Please wait...';
-      setTimeout(()=> {
-        fullOverlay.style.display = 'none';
-        // Now go to installing step
-        startInstalling();
-      }, FULLSCREEN_COMPLETE_MS);
-      return;
+  /* Copiar instrucciones al portapapeles */
+  function copiarInstrucciones(){
+    const formatted = '$' + (compra.amount||0).toFixed(2);
+    const texto = `Entra a PayPal y deposita EXACTAMENTE ${formatted} a ${SELLER_PAYPAL}. Si pones más o menos, tu pago no será válido. En la descripción deja tu correo Gmail para confirmar (ej: TuEmail@gmail.com). Producto: ${compra.item}.`;
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      navigator.clipboard.writeText(texto).then(()=> {
+        alert('Instrucciones copiadas al portapapeles.');
+        spawnConfetti();
+      }).catch(()=> { prompt('Copia manualmente:', texto); });
+    } else {
+      prompt('Copia manualmente:', texto);
     }
-
-    raf = requestAnimationFrame(tick);
   }
 
-  raf = requestAnimationFrame(tick);
-});
+  /* Abrir PayPal (sitio oficial) */
+  function abrirPayPal(){
+    window.open('https://www.paypal.com/', '_blank');
+  }
 
-// Installing step (5 minutes), then always fail
-function startInstalling(){
-  if(!downloadState) return;
-  downloadState.status = 'installing';
-  statusText.textContent = 'Installing files...';
-  smallOverlay.style.display = 'flex';
-  smallText.textContent = 'INSTALANDO ARCHIVOS...';
-  smallHint.textContent = 'Por favor espere — esto tardará 5 minutos';
+  /* Pagar en efectivo -> abre WhatsApp con mensaje preescrito */
+  function pagarEfectivo(){
+    const formatted = '$' + (compra.amount||0).toFixed(2);
+    const text = encodeURIComponent(`Hola, quiero comprar ${compra.item} por ${formatted}. ¿Cómo procedemos?`);
+    window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${text}`, '_blank');
+  }
 
-  const installStart = Date.now();
-  const installEnd = installStart + INSTALL_MS;
-
-  // Show a realtime countdown during install using RAF
-  function installTick(){
-    if(!downloadState || downloadState.status !== 'installing') return;
-    const now = Date.now();
-    const remainingMs = Math.max(0, installEnd - now);
-    const remainingSec = Math.ceil(remainingMs / 1000);
-    smallHint.textContent = `Tiempo restante: ${formatHMS(remainingSec)}`;
-
-    if (remainingMs <= 0){
-      // finishing install -> fail (as requested)
-      smallOverlay.style.display = 'none';
-      downloadState.status = 'failed';
-      statusText.textContent = 'INSTALACIÓN FALLIDA';
-      estimateText.textContent = 'DESCARGA FALLIDA';
-      showToast('DESCARGA FALLIDA 😓 inténtalo de nuevo.');
-      // show big full-screen failed message and reset UI to allow retry
-      fullOverlay.style.display = 'flex';
-      overlayTitle.textContent = 'DESCARGA FALLIDA 😓';
-      overlaySub.textContent = 'Inténtalo de nuevo';
-      setTimeout(()=> {
-        fullOverlay.style.display = 'none';
-        resetUIAfterFail();
-      }, 3000);
-      return;
+<a href="https://wa.me/50373826693?text=Hola%2C%20quiero%20comprar%20este%20paquete.%20Por%20favor%20más%20información." 
+   target="_blank" 
+   style="
+       display: inline-block;
+       background-color: #25D366;
+       padding: 12px 20px;
+       color: white;
+       text-decoration: none;
+       font-size: 16px;
+       font-weight: bold;
+       border-radius: 10px;
+       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+   ">
+    Comprar por WhatsApp
+</a>
+  /* Key simple (mantén las keys que ya tenías) */
+  const validKeys = ["ANDZXKEY","NEWKEY","BROTHERKEY","ROBUXKEY","MEMKEY","NOHEMZXKEY"];
+  function checkKey(){
+    const k = (document.getElementById('keyInput')||{}).value || '';
+    if(validKeys.includes(String(k).trim().toUpperCase())){
+      alert('✅ Key aceptada — paquetes secretos desbloqueados.');
+      // show secret section if it exists (kept for compatibility)
+      const secret = document.getElementById('secret');
+      if(secret) secret.style.display = 'block';
+      spawnConfetti();
+    } else {
+      alert('❌ Key incorrecta');
+      // pequeño shake
+      const input = document.getElementById('keyInput');
+      input.style.transition='transform .08s'; input.style.transform='translateX(-6px)';
+      setTimeout(()=>{ input.style.transform='translateX(6px)'; },80);
+      setTimeout(()=>{ input.style.transform='translateX(0)'; },160);
     }
-    requestAnimationFrame(installTick);
   }
 
-  requestAnimationFrame(installTick);
-}
-
-// Reset UI so user can try again
-function resetUIAfterFail(){
-  downloadState = null;
-  progressBar.style.width = '0%';
-  pct.textContent = '0%';
-  statusText.textContent = 'Waiting';
-  estimateText.textContent = 'Ready to download';
-  timeLeft.textContent = '—';
-}
-
-// Invalidate if page hidden or unloading
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden){
-    // user left the tab -> invalidate
-    invalidateDownload('Se detectó que dejaste la página (tab oculta).');
-  }
-});
-
-// If user tries to close or navigate away - we'll invalidate and show a confirmation dialog
-window.addEventListener('beforeunload', (e) => {
-  if (downloadState && (downloadState.status === 'running' || downloadState.status === 'installing')){
-    // mark invalidated
-    invalidateDownload('Intento de salir de la página durante descarga.');
-    // show browser confirm (some browsers ignore custom message)
-    e.preventDefault();
-    e.returnValue = '';
-    return '';
-  }
-});
-
-// If page is hidden at initial load, we warn as well
-if (document.hidden) {
-  showToast('La pestaña está oculta — no inicies la descarga si piensas salir.');
-}
-
-// Accessibility: keyboard activate
-btn.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); btn.click(); } });
-
-</script>
-</body>
-</html>
+  /* Confetti (simple) */
+  function spawnConfetti(){
+    const count = 36;
+    for(let i=0;i<count;i++){
+      const d = document.createElement('div');
+      d.className = 'confetti';
+      const size = Math.floor(Math.random()*10)+8;
+      d.style.left = (20 + Math.random()*60) + '%';
+      d.style.top = '-10px';
+      d.style.width = size + 'px';
+      d.style.height = Math.floor(size*0.6) + 'px';
+      d.style.background = `hsl(${Math.random()*40 + 20},90%
