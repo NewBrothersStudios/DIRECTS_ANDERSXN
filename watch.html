@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minitubee.com — Reproducir</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="header">
+    <div class="logo">Minitubee.com</div>
+    <div style="flex:1"></div>
+    <button onclick="location.href='index.html'" class="btn" style="background:#222">Inicio</button>
+  </header>
+
+  <main style="max-width:1000px;margin:28px auto;padding:0 16px">
+    <div class="player" style="background:#fff;padding:0;border-radius:12px;overflow:hidden">
+      <video id="videoPlayer" controls style="width:100%;background:#000"></video>
+      <div class="meta" style="background:#fff;color:#111">
+        <h2 id="titleEl"></h2>
+        <p id="descEl" style="color:#606060"></p>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button id="likeBtn" class="btn" style="background:#222">Like</button>
+          <div id="likesCount" style="align-self:center;color:#606060">0 likes</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:18px" class="upload-card">
+      <h3>Comentarios</h3>
+      <div id="commentsList" style="margin-top:10px"></div>
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <input id="commentInput" style="flex:1;padding:10px;border-radius:8px;border:1px solid #eee" placeholder="Escribe un comentario...">
+        <button id="sendComment" class="btn">Comentar</button>
+      </div>
+    </div>
+  </main>
+
+<script type="module">
+  import { db, auth } from './firebase.js';
+  import { doc, getDoc, collection, addDoc, query, orderBy, onSnapshot, updateDoc, increment } 
+    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  const params = new URLSearchParams(location.search);
+  const id = params.get('id');
+  const videoPlayer = document.getElementById('videoPlayer');
+  const titleEl = document.getElementById('titleEl');
+  const descEl = document.getElementById('descEl');
+  const commentsList = document.getElementById('commentsList');
+  const commentInput = document.getElementById('commentInput');
+  const sendComment = document.getElementById('sendComment');
+  const likeBtn = document.getElementById('likeBtn');
+  const likesCount = document.getElementById('likesCount');
+
+  let currentUser = null;
+  onAuthStateChanged(auth, u => currentUser = u);
+
+  if(!id) {
+    alert('ID de video faltante');
+    location.href = 'index.html';
+  }
+
+  const videoDocRef = doc(db, 'videos', id);
+
+  // Load metadata
+  (async ()=>{
+    const snap = await getDoc(videoDocRef);
+    if(!snap.exists()){ alert('Video no encontrado'); location.href='index.html'; return; }
+    const data = snap.data();
+    titleEl.textContent = data.title || 'Sin título';
+    descEl.textContent = data.description || '';
+    videoPlayer.src = data.videoUrl;
+    likesCount.textContent = (data.likes||0) + ' likes';
+  })();
+
+  // Comments realtime
+  const commentsCol = collection(videoDocRef, 'comments');
+  const q = query(commentsCol, orderBy('createdAt', 'asc'));
+  onSnapshot(q, snap=>{
+    commentsList.innerHTML = '';
+    if(snap.empty){ commentsList.innerHTML = '<div style="color:#606060">Sé el primero en comentar</div>'; return; }
+    snap.forEach(c=>{
+      const d = c.data();
+      const el = document.createElement('div');
+      el.style.padding = '8px 0';
+      el.innerHTML = `<div style="font-weight:700">${d.userEmail || 'Anon'}</div><div style="color:#606060">${d.text}</div>`;
+      commentsList.appendChild(el);
+    });
+  });
+
+  // Post comment
+  sendComment.addEventListener('click', async ()=>{
+    if(!currentUser) return alert('Debes iniciar sesión para comentar');
+    const txt = commentInput.value.trim();
+    if(!txt) return;
+    await addDoc(commentsCol, { text: txt, userUid: currentUser.uid, userEmail: currentUser.email, createdAt: new Date() });
+    commentInput.value = '';
+  });
+
+  // Like button (simple increment)
+  likeBtn.addEventListener('click', async ()=>{
+    if(!currentUser) return alert('Inicia sesión para dar like');
+    await updateDoc(videoDocRef, { likes: increment(1) });
+    const docSnap = await getDoc(videoDocRef);
+    likesCount.textContent = (docSnap.data().likes||0) + ' likes';
+  });
+</script>
+</body>
+</html>
