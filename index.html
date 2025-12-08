@@ -1,459 +1,499 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="es">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<meta name="google-site-verification" content="7IGGioxLL0FSkhq5319O2gWT4PCtA4Q1c3MR2zk1Xtc" />
-<title>Bobux — Tienda</title>
-
+<title>MiniTube — Subir Videos</title>
 <style>
-/* -------------------------
-   RESET Y BASE
-------------------------- */
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%}
-body{
-  font-family:"Poppins",system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
-  background:linear-gradient(180deg,#2a1400 0%, #100700 100%);
-  color:#BBDEFB;
-  -webkit-font-smoothing:antialiased;
-  -moz-osx-font-smoothing:grayscale;
-  padding-top:88px;
-  overflow-x:hidden;
-  text-align:center;
-}
+  :root{
+    --bg:#0f1720;
+    --card:#0b1220;
+    --accent:#ff0000;
+    --muted:#9aa4b2;
+    --glass: rgba(255,255,255,0.03);
+    --radius:14px;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,system-ui,Segoe UI,Roboto,Arial;
+    background: linear-gradient(180deg,#071021 0%, #0b1220 100%);
+    color:#e6eef6;
+    padding:24px;
+  }
+  .container{
+    max-width:1100px;
+    margin:0 auto;
+    display:grid;
+    grid-template-columns: 420px 1fr;
+    gap:20px;
+    align-items:start;
+  }
 
-/* Top bar */
-.top-bar{
-  position:fixed;top:0;left:0;width:100%;
-  background:linear-gradient(90deg, rgba(255,160,0,0.98), rgba(255,110,0,0.95));
-  padding:16px 18px;display:flex;justify-content:space-between;align-items:center;
-  color:#C8E6C9;z-index:140;border-bottom:3px solid rgba(255,140,0,0.14);
-  box-shadow:0 6px 24px rgba(0,0,0,0.45);
-  transform:translateY(-8px);
-  animation:barDrop .6s cubic-bezier(.2,.9,.3,1) forwards;
-}
-@keyframes barDrop{to{transform:translateY(0)}}
+  /* SIDEBAR (Upload panel) */
+  .card{
+    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+    border-radius:var(--radius);
+    padding:18px;
+    box-shadow: 0 6px 30px rgba(2,6,23,0.6);
+  }
+  h1{font-size:18px;margin:0 0 12px 0}
+  .drop{
+    border:2px dashed rgba(255,255,255,0.06);
+    padding:24px;
+    border-radius:12px;
+    text-align:center;
+    cursor:pointer;
+    transition:background .12s, border-color .12s, transform .08s;
+    background:var(--glass);
+    color:var(--muted);
+  }
+  .drop.dragover{
+    border-color: rgba(255,255,255,0.18);
+    transform:translateY(-2px);
+    background: rgba(255,255,255,0.02);
+  }
+  input[type="file"]{display:none}
+  label.btn{
+    display:inline-block;
+    margin-top:12px;
+    padding:10px 14px;
+    border-radius:999px;
+    background:rgba(255,255,255,0.03);
+    color:#e9f2ff;
+    font-weight:600;
+    cursor:pointer;
+    border:1px solid rgba(255,255,255,0.04);
+  }
 
-/* Header */
-header{margin-top:6px;padding:8px 12px}
-h1{
-  font-size:2.0rem;
-  color:#ff44336;
-  letter-spacing:0.6px;
-  text-shadow:0 6px 18px rgba(255,150,0,0.12),0 0 22px rgba(255,200,50,0.06);
-  animation:glowText 2.4s ease-in-out infinite alternate;
-}
-@keyframes glowText{
-  from{text-shadow:0 6px 18px rgba(255,140,0,0.12),0 0 14px rgba(255,180,50,0.04)}
-  to{text-shadow:0 12px 30px rgba(255,180,0,0.18),0 0 36px rgba(255,220,90,0.08)}
-}
-h2{color:#ffe9b3;font-weight:500;margin-top:6px;font-size:1rem}
+  .meta{margin-top:14px; display:grid; gap:10px}
+  .meta input[type="text"], .meta textarea{
+    width:100%;
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid rgba(255,255,255,0.03);
+    background: rgba(0,0,0,0.25);
+    color: #e6eef6;
+    resize:vertical;
+  }
+  .meta-row{display:flex; gap:8px}
+  .small{font-size:12px;color:var(--muted)}
 
-/* Layout container */
-.container{display:flex;flex-wrap:wrap;gap:18px;justify-content:center;padding:20px;max-width:1100px;margin:8px auto}
+  .preview{
+    margin-top:14px;
+    display:grid;
+    gap:8px;
+  }
+  video{
+    width:100%;
+    border-radius:10px;
+    background:black;
+    max-height:240px;
+  }
+  .thumb{
+    width:180px;
+    height:100px;
+    object-fit:cover;
+    border-radius:6px;
+    border:1px solid rgba(255,255,255,0.03);
+  }
 
-/* CARD */
-.card{
-  background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-  width:94%;
-  max-width:420px;
-  border-radius:18px;
-  padding:18px;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  box-shadow:0 10px 34px rgba(0,0,0,0.6), inset 0 -4px 18px rgba(255,140,0,0.03);
-  transition:transform .28s cubic-bezier(.2,.9,.3,1), box-shadow .28s;
-  will-change:transform;
-  overflow:hidden;
-  position:relative;
-  border:1px solid rgba(255,170,0,0.08);
-  transform:translateY(10px);
-  animation:cardIn .6s ease forwards;
-}
-@keyframes cardIn{to{transform:translateY(0)}}
-.card::before{
-  content:"";
-  position:absolute;left:-40%;top:-40%;width:120%;height:120%;
-  background:radial-gradient(circle at 10% 10%, rgba(255,215,120,0.08), transparent 10%),
-             radial-gradient(circle at 90% 90%, rgba(255,120,50,0.06), transparent 10%);
-  transform:scale(1.05);
-  pointer-events:none;
-}
-.card:hover{transform:translateY(-10px) scale(1.02); box-shadow:0 22px 50px rgba(255,150,0,0.16)}
+  .progress{
+    height:10px;
+    width:100%;
+    background: rgba(255,255,255,0.03);
+    border-radius:999px;
+    overflow:hidden;
+  }
+  .progress > i{
+    display:block;
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg, var(--accent), #ff7b7b);
+    transition: width .2s linear;
+  }
 
-.robux-title{font-size:1.35rem;color:#E1BEE7; margin-bottom:8px; font-weight:700; text-shadow:0 4px 18px rgba(255,170,0,0.06)}
-.price-row{width:100%;display:flex;flex-direction:column;align-items:center;margin-bottom:10px}
-.price{font-weight:800;color:#388E3C;font-size:1.15rem}
-.price-bar{
-  width:92%;height:12px;border-radius:10px;
-  background:linear-gradient(90deg,#ffd54f,#ff8a00);
-  margin-top:10px;
-  box-shadow:0 6px 30px rgba(255,140,0,0.12) inset;
-  position:relative;
-  overflow:hidden;
-}
-.price-bar::after{
-  content:"";position:absolute;left:-30%;top:0;width:50%;height:100%;
-  background:linear-gradient(90deg, rgba(255,255,255,0.35), rgba(255,255,255,0));
-  transform:skewX(-18deg);
-  animation:barShine 2.2s linear infinite;
-}
-@keyframes barShine{to{left:120%}}
+  .actions{
+    margin-top:12px;
+    display:flex;
+    gap:8px;
+    align-items:center;
+  }
+  .primary{
+    background:linear-gradient(180deg,var(--accent),#c80000);
+    border:none;
+    color:white;
+    padding:10px 14px;
+    border-radius:10px;
+    cursor:pointer;
+    font-weight:700;
+  }
+  .secondary{
+    background:transparent;
+    color:var(--muted);
+    border:1px solid rgba(255,255,255,0.03);
+    padding:8px 12px;
+    border-radius:8px;
+    cursor:pointer;
+  }
 
-.btn{
-  margin-top:14px;padding:16px 26px;font-size:1.05rem;border-radius:999px;border:none;cursor:pointer;
-  background:linear-gradient(90deg,#ffcf5e,#ff7d00);color:#E8F5E9;font-weight:800;
-  box-shadow:0 10px 30px rgba(255,140,0,0.22), 0 2px 6px rgba(0,0,0,0.18);
-  transition:transform .18s, box-shadow .18s;
-  letter-spacing:0.4px;
-}
-.btn:active{transform:translateY(2px) scale(.995)}
-.btn.hoverPulse{animation:pulse 1.8s infinite}
-@keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+  /* RIGHT: gallery / listado "subidos" */
+  .list{
+    display:grid;
+    gap:14px;
+  }
+  .video-card{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    background: rgba(255,255,255,0.015);
+    padding:12px;
+    border-radius:12px;
+  }
+  .video-card img{width:160px;height:90px;object-fit:cover;border-radius:8px}
+  .video-info h3{margin:0;font-size:15px}
+  .video-info p{margin:6px 0 0 0;color:var(--muted);font-size:13px}
 
-.small{font-size:.98rem;color:#ffe9b3;margin-top:10px}
-
-/* Overlays */
-#overlayLoad,#overlayPay{position:fixed;left:0;top:0;width:100%;height:100%;display:none;align-items:center;justify-content:center;background:linear-gradient(180deg, rgba(0,0,0,0.6), rgba(0,0,0,0.7));z-index:260}
-.modal{background:linear-gradient(180deg,#3b1800,#2a1200);border-radius:16px;padding:18px; width:94%;max-width:560px;color:#fff8e5;box-shadow:0 20px 60px rgba(0,0,0,0.7);border:2px solid rgba(255,170,0,0.18);transform:translateY(18px);animation:modalIn .48s cubic-bezier(.2,.9,.3,1) forwards}
-@keyframes modalIn{to{transform:translateY(0)}}
-
-/* -------------------------
-   BURBUJA FLOTANTE
-------------------------- */
-#floatingBubble{
-  position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  background: gold;
-  box-shadow: 0 0 18px rgba(255,215,0,0.8);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  cursor: pointer;
-  animation: bubbleFloat 3s infinite ease-in-out;
-  z-index: 99999;
-  font-size: 30px;
-}
-
-/* Anim burbuja */
-@keyframes bubbleFloat {0%{transform:translateY(0)}50%{transform:translateY(-10px)}100%{transform:translateY(0)}}
-
-/* -------------------------
-   RULETA (overlay)
-------------------------- */
-#wheelContainer{
-  position: fixed;
-  top:0;left:0;width:100%;height:100%;
-  background: rgba(120,0,0,0.88);
-  display:none;justify-content:center;align-items:center;flex-direction:column;padding:20px;z-index:100000;
-}
-#closeWheel{position:absolute;top:15px;right:15px;background:black;color:white;padding:10px 15px;border-radius:10px;cursor:pointer;z-index:200000}
-#wheelBox{background:#ffb3b3;padding:20px;border-radius:20px;text-align:center;width:90%;max-width:430px;position:relative;animation:popIn .4s ease}
-@keyframes popIn{0%{transform:scale(0.6);opacity:0}100%{transform:scale(1);opacity:1}}
-
-/* Ruleta */
-#wheel{width:300px;height:300px;border-radius:50%;border:10px solid gold;box-shadow:0 0 15px gold,inset 0 0 20px rgba(255,215,0,0.7);margin:0 auto;display:block}
-#pointer{position:absolute;right:-40px;top:50%;transform:translateY(-50%);font-size:55px;font-weight:bold;color:red;text-shadow:0 0 6px black}
-
-/* Scroll area and boxes */
-#scrollArea{margin-top:20px;height:230px;overflow-y:scroll;padding-right:10px}
-.buyBox{background:#0057ff;border:2px solid yellow;border-radius:12px;padding:10px;text-align:center;color:yellow;margin-bottom:15px;animation:zoomLoop 4s infinite ease-in-out;cursor:pointer}
-@keyframes zoomLoop{0%{transform:scale(1)}50%{transform:scale(1.07)}100%{transform:scale(1)}}
-.buyBox span{display:block;font-weight:bold}
-
-/* VIP */
-.vip-container{position: absolute; top: 70px; right: 10px; text-align:center; z-index:999}
-.vip-new{font-size:10px;color:#007bff;font-weight:bold}
-.vip-circle{width:55px;height:55px;background:gold;border-radius:50%;display:flex;justify-content:center;align-items:center;cursor:pointer;animation:vipPulse 1.6s infinite ease-in-out;box-shadow:0 0 8px rgba(0,0,0,0.2)}
-.vip-text{font-size:20px;font-weight:bold;color:black}
-@keyframes vipPulse{0%{transform:scale(1)}50%{transform:scale(1.13)}100%{transform:scale(1)}}
-
-/* VIP modal */
-.vip-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.75);display:none;justify-content:center;align-items:center;padding:20px;z-index:9999}
-.vip-content{background:#0e355e;padding:20px;border-radius:12px;width:85%;max-width:320px;text-align:center;color:#9aff9a;animation:slideFade .55s ease}
-@keyframes slideFade{0%{opacity:0;transform:translateY(40px) scale(.9)}100%{opacity:1;transform:translateY(0) scale(1)}}
-.vip-subscribe{background:#28a745;color:white;border:none;padding:12px 18px;border-radius:10px;font-size:15px;margin-top:10px;cursor:pointer;width:100%;font-weight:bold}
-.vip-close{margin-top:15px;background:#007bff;color:white;border:none;padding:10px 18px;border-radius:10px;cursor:pointer;width:100%}
-
-/* Responsive tweaks */
-@media(min-width:800px){
-  .container{padding:28px}
-  .card{width:260px}
-}
+  .empty{color:var(--muted);text-align:center;padding:40px;border-radius:12px}
+  footer{margin-top:18px;color:var(--muted);font-size:13px;text-align:center}
+  @media (max-width:980px){
+    .container{grid-template-columns:1fr; padding-bottom:40px}
+  }
 </style>
 </head>
 <body>
+  <div class="container">
+    <!-- UPLOAD PANEL -->
+    <div class="card" id="uploader">
+      <h1>Sube tu video</h1>
+      <div id="dropZone" class="drop">
+        Arrastra y suelta un video aquí<br>
+        <small class="small">MP4, WebM, MOV — máximo 200 MB</small><br>
+        <label class="btn" for="fileInput">Seleccionar archivo</label>
+        <input id="fileInput" type="file" accept="video/*">
+      </div>
 
-<!-- TOP BAR -->
-<div class="top-bar" role="banner">
-  <div>🔥<strong>nueva ruleta por tiempo limitado!!!</strong></div>
-  <div id="serverCount" aria-live="polite">estamos trabajando en nuestra traducción a ingles!.</div>
-</div>
+      <div class="meta">
+        <input id="title" type="text" placeholder="Título del video (obligatorio)" />
+        <textarea id="description" rows="3" placeholder="Descripción (opcional)"></textarea>
+        <div class="meta-row">
+          <input id="tags" type="text" placeholder="Etiquetas separadas por comas" />
+          <input id="privacy" type="text" placeholder="Privacidad (pública/privada)" style="width:140px" />
+        </div>
 
-<header>
-  <h1>Bobux</h1>
-  <h2>Versión 0.0.1— Ruleta de la suerte</h2>
-  <p class="small">Sigue las instrucciones de pago que aparecen al comprar.</p>
-</header>
+        <div class="preview" id="previewArea" style="display:none">
+          <div>
+            <video id="videoPreview" controls></video>
+          </div>
+          <div style="display:flex; gap:12px; align-items:center">
+            <img id="thumbPreview" class="thumb" alt="miniatura">
+            <div>
+              <div class="small">Miniatura generada automáticamente</div>
+              <button id="regenThumb" class="secondary" style="margin-top:8px">Regenerar miniatura</button>
+            </div>
+          </div>
 
-<main class="container" id="paquetes">
-  <!-- Paquetes (cada botón usa enviarWhatsApp para mensaje pre-escrito) -->
-  <div class="card">
-    <div class="robux-title">⏣ 40 robux</div>
-    <div class="price-row"><div class="price">$0.75</div><div class="price-bar" aria-hidden="true"></div></div>
-    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 40 Robux por $0.75')">Comprar</button>
-    <div class="small">-5% descuento</div>
-  </div>
+          <div class="small">Progreso de subida</div>
+          <div class="progress"><i id="progBar"></i></div>
+        </div>
 
-  <div class="card">
-    <div class="robux-title">⏣ 80 robux</div>
-    <div class="price-row"><div class="price">$1.75</div><div class="price-bar"></div></div>
-    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 80 Robux por $1.75')">Comprar</button>
-    <div class="small">-5% descuento</div>
-  </div>
+        <div class="actions">
+          <button id="uploadBtn" class="primary">Subir video</button>
+          <button id="clearBtn" class="secondary">Limpiar</button>
+          <div style="flex:1"></div>
+          <div class="small" id="statusText"></div>
+        </div>
+      </div>
+    </div>
 
-  <div class="card">
-    <div class="robux-title">⏣ 400 robux</div>
-    <div class="price-row"><div class="price">$6.25</div><div class="price-bar"></div></div>
-    <button class="btn hoverPulse" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 400 Robux por $6.25')">Comprar</button>
-    <div class="small">-5% descuento</div>
-  </div>
-
-  <div class="card">
-    <div class="robux-title">⏣ 800 robux</div>
-    <div class="price-row"><div class="price">$12.99</div><div class="price-bar"></div></div>
-    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 800 Robux por $12.99')">Comprar</button>
-    <div class="small">-5% descuento</div>
-  </div>
-
-  <div class="card">
-    <div class="robux-title">⏣ 1000 robux</div>
-    <div class="price-row"><div class="price">$14.99</div><div class="price-bar"></div></div>
-    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el paquete de 1000 Robux por $14.99')">Comprar</button>
-    <div class="small">Paquete PREMIUM</div>
-  </div>
-
-  <div class="card">
-    <div class="robux-title">⏣ Paquete Secreto</div>
-    <div class="price-row"><div class="price">$23.99</div><div class="price-bar"></div></div>
-    <button class="btn" onclick="enviarWhatsApp('Hola, quiero comprar el Paquete Secreto por $23.99')">Comprar</button>
-    <div class="small">Accesible con Key</div>
-  </div>
-<!-- Membresías -->
-  <section class="memberships" aria-labelledby="membersTitle">
-    <h3 id="membersTitle" style="color:#ffdca8;margin-bottom:10px">MEBRESIAS ESPECIALES</h3>
-    <div class="container" style="gap:12px;">
+    <!-- GALLERY -->
+    <div>
       <div class="card">
-        <div class="robux-title">Membresía 4 días — +25% robux</div>
-        <div class="price-row">
-          <div class="price">$1.99</div>
-          <div class="price-bar"></div>
+        <h1>Tus videos</h1>
+        <div id="list" class="list">
+          <div class="empty">Aún no has subido videos.</div>
         </div>
-        <button class="btn" onclick="iniciarCompra('Membresía 4 días +25%',1.99)">Suscribirse</button>
-        <div class="small">extra robux en paquetes</div>
-      </div>
-
-      <div class="card">
-        <div class="robux-title">Membresía 8 días — +25% robux</div>
-        <div class="price-row">
-          <div class="price">$2.99</div>
-          <div class="price-bar"></div>
-        </div>
-        <button class="btn" onclick="iniciarCompra('Membresía 8 días +25%',2.99)">Suscribirse</button>
-        <div class="small">extra robux en paquetes</div>
-      </div>
-
-      <div class="card">
-        <div class="robux-title">Membresía 15 días — +25% robux</div>
-        <div class="price-row">
-          <div class="price">$4.99</div>
-          <div class="price-bar"></div>
-        </div>
-        <button class="btn" onclick="iniciarCompra('Membresía 15 días +25%',4.99)">Suscribirse</button>
-        <div class="small">Extra robux en paquetes!</div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Key / Encuesta -->
-  <section style="max-width:940px;margin:12px auto;padding:12px">
-    <div class="key-survey" style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-      <div style="text-align:left;min-width:260px">
-        <h4>🔐 Ingresa tu key secreta</h4>
-        <input id="keyInput" type="text" placeholder="Tu key aquí" aria-label="Key secreta">
-        <div style="margin-top:10px">
-          <button class="btn" onclick="checkKey()">Validar</button>
-        </div>
-      </div>
-      <div style="min-width:260px;text-align:left">
-        <h4>🗳️ Encuesta</h4>
-        <p class="small">¿Quieres que traigamos más paquetes?</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="ghost" onclick="vote('100 robux')">100 robux</button>
-          <button class="ghost" onclick="vote('250 robux')">250 robux</button>
-          <button class="ghost" onclick="vote('600 robux')">600 robux</button>
-        </div>
-        <p id="voteResult" class="voteResult"></p>
-      </div>
-    </div>
-  </section>
-
-  <!-- Overlay carga -->
-  <div id="overlayLoad" aria-hidden="true">
-    <div style="display:flex;flex-direction:column;align-items:center">
-      <div class="spinner" role="status" aria-label="Cargando"></div>
-      <div style="color:#ffeccf;margin-top:10px;font-weight:700">Cargando…</div>
-    </div>
-  </div>
-
-  <!-- Modal instrucciones PayPal -->
-  <div id="overlayPay" aria-hidden="true">
-    <div class="modal" role="dialog" aria-modal="true">
-      <h3>💳 MÉTODO DE PAGO</h3>
-
-      <div class="instruction" id="instLine1">
-        ➡️ Entra a PayPal y agrega este correo: <strong style="color:#ffd76a">gato41959@gmail.com</strong>
-      </div>
-
-      <div class="instruction" id="instLine2">
-        💵 Cantidad a depositar: <strong id="instAmount" style="color:#ffd76a">—</strong><br>
-        <small style="color:#ffdca8">(Si pones más o menos que la cantidad indicada, tu pago no será válido)</small>
-      </div>
-
-      <div class="instruction" id="instLine3">
-        📩 Recibirás un mensaje a tu correo. Por favor deja tu Gmail en la descripción del depósito.
-      </div>
-
-      <div id="instExtra" style="margin-top:6px;color:#ffdca8">Puedes copiar estas instrucciones y luego entrar a PayPal para hacer el depósito manualmente.</div>
-
-      <div class="actions" style="margin-top:12px">
-        <button class="copyBtn" onclick="copiarInstrucciones()">Copiar instrucciones</button>
-        <button class="ghost" onclick="abrirPayPal()">🔵 Abrir PayPal</button>
-        <button class="ghost" onclick="pagarEfectivo()">💚 Pagar en Efectivo (WhatsApp)</button>
-        <button class="ghost" onclick="cerrarPayModal()">Cerrar</button>
+        <footer>MiniTube demo — no es un servicio real. Implementa tu backend para guardar videos.</footer>
       </div>
     </div>
   </div>
-
-  <footer>© 2025 New Brothers Studios LLC — NOHEMXS</footer>
 
 <script>
-  /* --- Datos de contacto (mantener los que tenías) --- */
-  const SELLER_PAYPAL = 'gato41959@gmail.com';
-  const WHATSAPP_PHONE = '50373826693'; // sin signos
-  let compra = { item: '', amount: 0 };
+/*
+  MiniTube frontend:
+  - permite arrastrar/soltar o seleccionar un video
+  - muestra vista previa y genera miniatura (captura de frame)
+  - envía al endpoint /upload con XHR para mostrar progreso
+  - mantiene lista "local" de videos en localStorage (simulación)
+*/
 
-  /* --- iniciar compra: animación de carga, luego modal --- */
-  function iniciarCompra(item, priceNumber){
-    compra.item = item;
-    compra.amount = Number(priceNumber) || 0;
-    // mostrar overlay carga breve
-    document.getElementById('overlayLoad').style.display = 'flex';
-    if(navigator.vibrate) navigator.vibrate(40);
-    setTimeout(()=>{
-      document.getElementById('overlayLoad').style.display = 'none';
-      // actualizar modal monto
-      const formatted = '$' + (compra.amount||0).toFixed(2);
-      document.getElementById('instAmount').innerText = formatted;
-      // mostrar modal instrucciones con efecto
-      const overlay = document.getElementById('overlayPay');
-      overlay.style.display = 'flex';
-      overlay.setAttribute('aria-hidden','false');
-      // pequeño rebote en modal
-      const modal = overlay.querySelector('.modal');
-      modal.style.transform = 'translateY(-8px) scale(0.98)';
-      modal.style.opacity = '0';
-      setTimeout(()=>{ modal.style.transition = 'transform .36s cubic-bezier(.2,.9,.3,1), opacity .36s'; modal.style.transform = 'translateY(0) scale(1)'; modal.style.opacity='1'; },20);
-      // scroll to top for mobile
-      window.scrollTo({top:0,behavior:'smooth'});
-    },700);
+const fileInput = document.getElementById('fileInput');
+const dropZone = document.getElementById('dropZone');
+const previewArea = document.getElementById('previewArea');
+const videoPreview = document.getElementById('videoPreview');
+const thumbPreview = document.getElementById('thumbPreview');
+const uploadBtn = document.getElementById('uploadBtn');
+const clearBtn = document.getElementById('clearBtn');
+const regenThumb = document.getElementById('regenThumb');
+const progBar = document.getElementById('progBar');
+const statusText = document.getElementById('statusText');
+const titleInput = document.getElementById('title');
+const descInput = document.getElementById('description');
+const tagsInput = document.getElementById('tags');
+const privacyInput = document.getElementById('privacy');
+const listEl = document.getElementById('list');
+
+let currentFile = null;
+let currentThumbBlob = null;
+
+const MAX_SIZE_BYTES = 200 * 1024 * 1024; // 200 MB
+
+// Helpers
+function showStatus(text){ statusText.textContent = text || '' }
+function bytesToMB(n){ return (n/1024/1024).toFixed(2) + ' MB' }
+
+function validFile(file){
+  if(!file) return false;
+  if(!file.type.startsWith('video')) return false;
+  if(file.size > MAX_SIZE_BYTES){
+    alert('Archivo demasiado grande: ' + bytesToMB(file.size) + '. Máx 200 MB.');
+    return false;
   }
+  return true;
+}
 
-  function cerrarPayModal(){
-    const overlay = document.getElementById('overlayPay');
-    const modal = overlay.querySelector('.modal');
-    modal.style.transition = 'transform .22s ease, opacity .22s';
-    modal.style.transform = 'translateY(12px) scale(.98)';
-    modal.style.opacity = '0';
-    setTimeout(()=>{ overlay.style.display = 'none'; overlay.setAttribute('aria-hidden','true'); modal.style.transform=''; modal.style.opacity=''; },220);
+function resetUploader(){
+  currentFile = null;
+  currentThumbBlob = null;
+  videoPreview.src = '';
+  thumbPreview.src = '';
+  previewArea.style.display = 'none';
+  fileInput.value = '';
+  titleInput.value = '';
+  descInput.value = '';
+  tagsInput.value = '';
+  privacyInput.value = '';
+  progBar.style.width = '0%';
+  showStatus('');
+}
+
+function loadListFromStorage(){
+  const raw = localStorage.getItem('minitube_videos');
+  try{
+    const arr = raw ? JSON.parse(raw) : [];
+    renderList(arr);
+  }catch(e){
+    localStorage.removeItem('minitube_videos');
+    renderList([]);
   }
+}
 
-  /* Copiar instrucciones al portapapeles */
-  function copiarInstrucciones(){
-    const formatted = '$' + (compra.amount||0).toFixed(2);
-    const texto = `Entra a PayPal y deposita EXACTAMENTE ${formatted} a ${SELLER_PAYPAL}. Si pones más o menos, tu pago no será válido. En la descripción deja tu correo Gmail para confirmar (ej: TuEmail@gmail.com). Producto: ${compra.item}.`;
-    if(navigator.clipboard && navigator.clipboard.writeText){
-      navigator.clipboard.writeText(texto).then(()=> {
-        alert('Instrucciones copiadas al portapapeles.');
-        spawnConfetti();
-      }).catch(()=> { prompt('Copia manualmente:', texto); });
-    } else {
-      prompt('Copia manualmente:', texto);
+function saveToLocalList(item){
+  const raw = localStorage.getItem('minitube_videos');
+  const arr = raw ? JSON.parse(raw) : [];
+  arr.unshift(item); // nuevo al inicio
+  localStorage.setItem('minitube_videos', JSON.stringify(arr.slice(0,30))); // guardar max 30
+  renderList(arr);
+}
+
+function renderList(arr){
+  listEl.innerHTML = '';
+  if(!arr || arr.length === 0){
+    listEl.innerHTML = '<div class="empty">Aún no has subido videos.</div>';
+    return;
+  }
+  arr.forEach(v=>{
+    const div = document.createElement('div');
+    div.className = 'video-card';
+    div.innerHTML = `
+      <img src="${v.thumb}" alt="thumb">
+      <div class="video-info">
+        <h3>${escapeHtml(v.title || 'Sin título')}</h3>
+        <p>${escapeHtml(v.description || '')}</p>
+        <div class="small">${v.size} • ${v.date}</div>
+      </div>
+    `;
+    listEl.appendChild(div);
+  });
+}
+
+// Escapar texto para seguridad cuando mostramos en innerHTML
+function escapeHtml(s){
+  if(!s) return '';
+  return s.replace(/[&<>"']/g, (m) => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"
+  }[m]));
+}
+
+// Drag & drop
+['dragenter','dragover'].forEach(ev=>{
+  dropZone.addEventListener(ev, e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.add('dragover');
+  });
+});
+['dragleave','drop'].forEach(ev=>{
+  dropZone.addEventListener(ev, e=>{
+    e.preventDefault();
+    e.stopPropagation();
+    dropZone.classList.remove('dragover');
+  });
+});
+dropZone.addEventListener('drop', e=>{
+  const f = e.dataTransfer.files && e.dataTransfer.files[0];
+  handleFileSelection(f);
+});
+dropZone.addEventListener('click', ()=> fileInput.click());
+fileInput.addEventListener('change', ()=> handleFileSelection(fileInput.files[0]));
+
+// Manejo archivo
+function handleFileSelection(file){
+  if(!validFile(file)) return;
+  currentFile = file;
+  // Vista previa
+  const url = URL.createObjectURL(file);
+  videoPreview.src = url;
+  videoPreview.load();
+  previewArea.style.display = 'block';
+  showStatus('Archivo listo: ' + file.name + ' (' + bytesToMB(file.size) + ')');
+  // Generar miniatura
+  generateThumbnail(url, 1.0).then(blobUrl=>{
+    thumbPreview.src = blobUrl;
+    // convert blobUrl to base64 for storage later (optional)
+    fetch(blobUrl).then(r=>r.blob()).then(b=>{
+      currentThumbBlob = b;
+    });
+  }).catch(err=>{
+    console.warn('No se pudo generar miniatura', err);
+    thumbPreview.src = '';
+  });
+}
+
+// Generar miniatura desde un frame del video
+function generateThumbnail(videoUrl, seekTo = 1.0){
+  return new Promise((resolve, reject) => {
+    const video = document.createElement('video');
+    video.preload = 'metadata';
+    video.src = videoUrl;
+    video.muted = true;
+    video.playsInline = true;
+    video.addEventListener('loadedmetadata', ()=>{
+      // si video es muy corto, ajustar seek
+      const time = Math.min(seekTo, Math.max(0, video.duration * 0.3));
+      video.currentTime = time;
+    });
+    video.addEventListener('seeked', ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 640;
+      canvas.height = video.videoHeight || 360;
+      // escalar a proporción 16:9 para la miniatura
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(blob=>{
+        if(!blob) return reject(new Error('No se pudo crear blob de miniatura'));
+        const blobUrl = URL.createObjectURL(blob);
+        resolve(blobUrl);
+      }, 'image/jpeg', 0.85);
+    });
+    video.addEventListener('error', (e)=> reject(e));
+  });
+}
+
+// Subir al servidor (ejemplo con XHR para progreso)
+uploadBtn.addEventListener('click', ()=>{
+  if(!currentFile){ alert('Selecciona un video primero.'); return; }
+  if(!titleInput.value.trim()){ if(!confirm('Sin título. ¿Continuar?')) return; }
+  // Prepara formData
+  const fd = new FormData();
+  fd.append('video', currentFile, currentFile.name);
+  fd.append('title', titleInput.value || '');
+  fd.append('description', descInput.value || '');
+  fd.append('tags', tagsInput.value || '');
+  fd.append('privacy', privacyInput.value || 'public');
+
+  // endpoint a tu servidor que reciba multipart/form-data
+  const UPLOAD_URL = '/upload'; // cambia a la ruta real de tu backend
+
+  const xhr = new XMLHttpRequest();
+  xhr.open('POST', UPLOAD_URL, true);
+
+  xhr.upload.onprogress = function(e){
+    if(e.lengthComputable){
+      const pct = Math.round((e.loaded / e.total) * 100);
+      progBar.style.width = pct + '%';
+      showStatus('Subiendo — ' + pct + '%');
     }
-  }
-
-  /* Abrir PayPal (sitio oficial) */
-  function abrirPayPal(){
-    window.open('https://www.paypal.com/', '_blank');
-  }
-
-  /* Pagar en efectivo -> abre WhatsApp con mensaje preescrito */
-  function pagarEfectivo(){
-    const formatted = '$' + (compra.amount||0).toFixed(2);
-    const text = encodeURIComponent(`Hola, quiero comprar ${compra.item} por ${formatted}. ¿Cómo procedemos?`);
-    window.open(`https://wa.me/${WHATSAPP_PHONE}?text=${text}`, '_blank');
-  }
-
-<a href="https://wa.me/50373826693?text=Hola%2C%20quiero%20comprar%20este%20paquete.%20Por%20favor%20más%20información." 
-   target="_blank" 
-   style="
-       display: inline-block;
-       background-color: #25D366;
-       padding: 12px 20px;
-       color: white;
-       text-decoration: none;
-       font-size: 16px;
-       font-weight: bold;
-       border-radius: 10px;
-       box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-   ">
-    Comprar por WhatsApp
-</a>
-  /* Key simple (mantén las keys que ya tenías) */
-  const validKeys = ["ANDZXKEY","NEWKEY","BROTHERKEY","ROBUXKEY","MEMKEY","NOHEMZXKEY"];
-  function checkKey(){
-    const k = (document.getElementById('keyInput')||{}).value || '';
-    if(validKeys.includes(String(k).trim().toUpperCase())){
-      alert('✅ Key aceptada — paquetes secretos desbloqueados.');
-      // show secret section if it exists (kept for compatibility)
-      const secret = document.getElementById('secret');
-      if(secret) secret.style.display = 'block';
-      spawnConfetti();
+  };
+  xhr.onload = function(){
+    if(xhr.status >= 200 && xhr.status < 300){
+      showStatus('Subida completa ✅');
+      // Respuesta esperada: JSON con info del video (url, thumbUrl, etc.)
+      let res;
+      try{ res = JSON.parse(xhr.responseText); }catch(e){ res = null; }
+      // Si servidor no devuelve miniatura, guardamos la generada localmente como dataURL
+      if(res && res.thumbUrl){
+        saveToLocalList({
+          title: titleInput.value,
+          description: descInput.value,
+          thumb: res.thumbUrl,
+          size: bytesToMB(currentFile.size),
+          date: new Date().toLocaleString()
+        });
+      } else {
+        // convertir currentThumbBlob a base64 para mostrar localmente
+        if(currentThumbBlob){
+          const reader = new FileReader();
+          reader.onload = function(){ saveToLocalList({
+            title: titleInput.value,
+            description: descInput.value,
+            thumb: reader.result,
+            size: bytesToMB(currentFile.size),
+            date: new Date().toLocaleString()
+          }); resetUploader(); };
+          reader.readAsDataURL(currentThumbBlob);
+        } else {
+          saveToLocalList({
+            title: titleInput.value,
+            description: descInput.value,
+            thumb: '',
+            size: bytesToMB(currentFile.size),
+            date: new Date().toLocaleString()
+          });
+          resetUploader();
+        }
+      }
     } else {
-      alert('❌ Key incorrecta');
-      // pequeño shake
-      const input = document.getElementById('keyInput');
-      input.style.transition='transform .08s'; input.style.transform='translateX(-6px)';
-      setTimeout(()=>{ input.style.transform='translateX(6px)'; },80);
-      setTimeout(()=>{ input.style.transform='translateX(0)'; },160);
+      showStatus('Error al subir: ' + xhr.statusText);
+      alert('La subida falló. Asegúrate de tener un backend que acepte /upload');
     }
-  }
+  };
+  xhr.onerror = function(){
+    showStatus('Error en la conexión');
+    alert('Error en la conexión al servidor. Revisa la consola del navegador.');
+  };
 
-  /* Confetti (simple) */
-  function spawnConfetti(){
-    const count = 36;
-    for(let i=0;i<count;i++){
-      const d = document.createElement('div');
-      d.className = 'confetti';
-      const size = Math.floor(Math.random()*10)+8;
-      d.style.left = (20 + Math.random()*60) + '%';
-      d.style.top = '-10px';
-      d.style.width = size + 'px';
-      d.style.height = Math.floor(size*0.6) + 'px';
-      d.style.background = `hsl(${Math.random()*40 + 20},90%
+  // COMIENZA subida
+  xhr.send(fd);
+  showStatus('Iniciando subida...');
+});
+
+// Botones
+clearBtn.addEventListener('click', ()=> {
+  if(confirm('Limpiar formulario?')) resetUploader();
+});
+regenThumb.addEventListener('click', ()=>{
+  if(!currentFile) return alert('Primero selecciona un video');
+  const url = URL.createObjectURL(currentFile);
+  generateThumbnail(url, 1.5).then(blobUrl=>{
+    thumbPreview.src = blobUrl;
+    fetch(blobUrl).then(r=>r.blob()).then(b=> currentThumbBlob = b);
+  }).catch(()=>alert('No se pudo regenerar miniatura'));
+});
+
+// AL CARGAR página
+loadListFromStorage();
+
+</script>
+</body>
+</html>
