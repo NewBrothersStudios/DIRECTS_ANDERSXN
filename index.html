@@ -1,542 +1,196 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>MiniTube — tu YouTube animado (Firebase)</title>
-
-<script type="module">
-  // Importar Firebase desde CDN
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
-
-  // Tu configuración
-  const firebaseConfig = {
-    apiKey: "AIzaSyAcqdPzBs7LqcEOorx1wruh_mUh8tUzv_U",
-    authDomain: "minitube-com.firebaseapp.com",
-    projectId: "minitube-com",
-    storageBucket: "minitube-com.firebasestorage.app",
-    messagingSenderId: "563953160914",
-    appId: "1:563953160914:web:b363654d757fdddd49130b",
-    measurementId: "G-530SWPJWKW"
-  };
-
-  // Inicializar Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
-
-<style>
-  /* ---------- BASE / THEME ---------- */
-  :root{
-    --bg:#071025;
-    --panel:#0b1530;
-    --muted:#9fb0cc;
-    --accent:#ff3b30;
-    --glass: rgba(255,255,255,0.03);
-    --radius:14px;
-  }
-  *{box-sizing:border-box}
-  body{
-    margin:0;
-    font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;
-    background:
-      radial-gradient(800px 400px at 10% 10%, rgba(255,255,255,0.02), transparent 5%),
-      linear-gradient(180deg,var(--bg), #031022 140%);
-    color: #e7f0fb;
-    -webkit-font-smoothing:antialiased;
-    padding:20px;
-  }
-  .wrap{ max-width:1200px; margin:0 auto; display:grid; gap:18px;
-         grid-template-columns: 340px 1fr; align-items:start; }
-
-  /* ---------- SIDEBAR UPLOAD ---------- */
-  .panel{
-    background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
-    border-radius:var(--radius);
-    padding:16px;
-    box-shadow: 0 10px 40px rgba(2,6,23,0.6);
-  }
-  h1{font-size:18px;margin:0 0 10px 0}
-  .drop{
-    border-radius:12px;
-    padding:18px;
-    background:var(--glass);
-    border:1px dashed rgba(255,255,255,0.04);
-    text-align:center;
-    cursor:pointer;
-    transition:transform .12s ease, box-shadow .12s ease, border-color .12s ease;
-  }
-  .drop:hover{ transform:translateY(-4px); box-shadow:0 10px 30px rgba(0,0,0,0.35) }
-  .drop.dragover{ border-color: rgba(255,255,255,0.18); transform:translateY(-6px); }
-  .btn{ display:inline-block; margin-top:12px; padding:9px 12px; border-radius:999px;
-        background: linear-gradient(180deg,var(--accent), #c92a20); color:white; font-weight:700;
-        cursor:pointer; border:none; }
-  input[type="file"]{ display:none; }
-
-  .field{ margin-top:12px }
-  .field input[type="text"], .field textarea{
-    width:100%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,0.03);
-    background: rgba(0,0,0,0.28); color:inherit; resize:vertical;
-  }
-  .meta-row{ display:flex; gap:8px }
-  .meta-row .small{ flex:1 }
-
-  /* preview */
-  video.preview{ width:100%; border-radius:10px; max-height:220px; background:black; display:block; }
-  .thumb{ width:160px; height:90px; border-radius:8px; object-fit:cover; border:1px solid rgba(255,255,255,0.03) }
-
-  .progress{ height:10px; background: rgba(255,255,255,0.03); border-radius:999px; overflow:hidden; margin-top:8px; }
-  .progress > i{ display:block; height:100%; width:0%; transition: width .18s linear; background:linear-gradient(90deg,var(--accent), #ff8b7a); }
-
-  /* ---------- MAIN: GRID OF VIDEOS ---------- */
-  .main{ display:grid; gap:12px }
-  .toolbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px }
-  .search{ padding:8px 12px; border-radius:999px; border:1px solid rgba(255,255,255,0.03); background:transparent; color:inherit }
-  .grid{ display:grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap:14px; align-items:start }
-
-  .card{
-    background: linear-gradient(180deg, rgba(255,255,255,0.015), rgba(255,255,255,0.01));
-    border-radius:12px; overflow:hidden; cursor:pointer; transform:translateY(0);
-    transition: transform .18s ease, box-shadow .18s ease;
-  }
-  .card:hover{ transform:translateY(-8px); box-shadow: 0 18px 40px rgba(0,0,0,0.6) }
-  .thumb-wrap{ position:relative; overflow:hidden; }
-  .thumb-wrap img{ width:100%; height:150px; object-fit:cover; display:block; transform:scale(1); transition:transform .6s cubic-bezier(.2,.9,.3,1); }
-  .card:hover .thumb-wrap img{ transform:scale(1.08); }
-
-  .card .info{ padding:10px 12px }
-  .card h3{ margin:0 0 6px 0; font-size:15px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis }
-  .card p{ margin:0; font-size:13px; color:var(--muted); height:36px; overflow:hidden }
-
-  .meta-small{ font-size:12px; color:var(--muted); margin-top:8px }
-
-  /* ---------- MODAL PLAYER ---------- */
-  .modal{
-    position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:2000;
-    background: rgba(2,6,23,0.6); opacity:0; pointer-events:none; transition: opacity .18s ease;
-  }
-  .modal.open{ opacity:1; pointer-events:auto; }
-  .player{
-    width:min(1000px,96%); border-radius:12px; overflow:hidden; background:#000; transform:translateY(20px);
-    transition: transform .18s ease;
-  }
-  .modal.open .player{ transform:translateY(0) }
-  .player video{ width:100%; height:auto; background:black; display:block }
-  .player .meta{ padding:12px; color:#e6f0fb }
-  .close-btn{ position:absolute; top:14px; right:14px; background:rgba(0,0,0,0.4); border-radius:999px; padding:8px; color:white; cursor:pointer; border:1px solid rgba(255,255,255,0.06) }
-
-  /* responsive */
-  @media (max-width:980px){ .wrap{ grid-template-columns:1fr; } .thumb-wrap img{ height:150px } }
-</style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Minitubee.com — Inicio</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="wrap">
-    <!-- UPLOAD PANEL -->
-    <div class="panel">
-      <h1>Sube tu video</h1>
-      <div id="dropZone" class="drop" title="Arrastra o haz click">
-        <div style="font-weight:700; font-size:14px">Arrastra y suelta o haz click para seleccionar</div>
-        <div style="font-size:12px; color:var(--muted); margin-top:8px">MP4 / WebM / MOV — Máx 300 MB (modifica en Firebase si quieres)</div>
-        <label class="btn" style="display:inline-block" for="fileInput">Seleccionar archivo</label>
-        <input id="fileInput" type="file" accept="video/*">
-      </div>
+  <header class="header">
+    <div class="logo">Minitubee<span style="font-weight:400;color:#222">.com</span></div>
 
-      <div class="field">
-        <input id="title" placeholder="Título del video" type="text" />
-      </div>
-      <div class="field">
-        <textarea id="description" rows="3" placeholder="Descripción (opcional)"></textarea>
-      </div>
-      <div class="field meta-row">
-        <input id="tags" placeholder="Etiquetas (separadas por comas)" type="text" class="small" />
-        <input id="privacy" placeholder="Privacidad (pública)" type="text" class="small" style="width:120px" />
-      </div>
-
-      <div id="previewArea" style="display:none; margin-top:12px">
-        <video id="videoPreview" class="preview" controls muted></video>
-        <div style="display:flex; gap:10px; align-items:center; margin-top:8px">
-          <img id="thumbPreview" class="thumb" alt="miniatura">
-          <div style="flex:1">
-            <div style="font-size:12px;color:var(--muted)">Miniatura generada automáticamente</div>
-            <div style="margin-top:8px; display:flex; gap:8px">
-              <button id="regenThumb" class="btn" style="background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted)">Regenerar</button>
-              <button id="clearBtn" class="btn" style="background:transparent; border:1px solid rgba(255,255,255,0.06); color:var(--muted)">Limpiar</button>
-            </div>
-          </div>
-        </div>
-
-        <div style="margin-top:10px">
-          <div style="font-size:12px;color:var(--muted)">Progreso</div>
-          <div class="progress"><i id="progBar"></i></div>
-          <div id="statusText" style="font-size:12px;color:var(--muted); margin-top:8px"></div>
-          <div style="margin-top:10px; text-align:right">
-            <button id="uploadBtn" class="btn">Subir video</button>
-          </div>
-        </div>
-      </div>
+    <div class="searchbar">
+      <input id="searchInput" placeholder="Buscar videos, etiquetas, títulos...">
+      <button id="searchBtn" class="btn">Buscar</button>
     </div>
 
-    <!-- MAIN -->
-    <div class="main">
-      <div class="toolbar">
-        <div style="display:flex; gap:8px; align-items:center">
-          <input id="search" class="search" placeholder="Buscar títulos o etiquetas..." />
+    <div style="display:flex;gap:8px;align-items:center">
+      <div id="userEmail" style="color:#333;font-weight:600"></div>
+      <button id="uploadNav" class="btn">Subir</button>
+      <button id="authBtn" class="btn" style="background:#222">Iniciar</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <aside class="left">
+      <div class="card upload-card" style="margin-bottom:12px">
+        <h3>Bienvenido</h3>
+        <p style="color:#606060">Regístrate para subir, comentar y dar like.</p>
+        <div style="margin-top:8px">
+          <button id="openLoginSmall" class="btn" style="background:#222">Iniciar / Registrar</button>
         </div>
-        <div style="color:var(--muted)">MiniTube — Con Firebase</div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <h3>Categorías</h3>
+        <ul style="list-style:none;padding:8px 0;margin:0;color:#333">
+          <li style="padding:6px 0">Destacados</li>
+          <li style="padding:6px 0">Musica</li>
+          <li style="padding:6px 0">Gaming</li>
+          <li style="padding:6px 0">Tutoriales</li>
+        </ul>
+      </div>
+    </aside>
+
+    <section class="main">
+      <div class="toolbar">
+        <div style="font-weight:700">Explorar</div>
+        <div style="color:#606060">Últimos videos públicos</div>
       </div>
 
       <div id="grid" class="grid">
-        <!-- cards se insertan aquí -->
-        <div id="empty" style="grid-column:1/-1; text-align:center; color:var(--muted); padding:40px; border-radius:12px;">
-          Aún no hay videos. Sube uno desde la izquierda 🎬
+        <div style="grid-column:1/-1;padding:40px;text-align:center;color:#606060">Cargando videos…</div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Modal: Player -->
+  <div id="modal" class="modal" aria-hidden="true">
+    <div class="player" role="dialog" aria-modal="true" style="position:relative">
+      <button id="closePlayer" class="close-btn">✕</button>
+      <video id="modalVideo" controls></video>
+      <div class="meta">
+        <h3 id="modalTitle"></h3>
+        <p id="modalDesc" style="color:#606060"></p>
+        <div style="margin-top:8px;display:flex;gap:8px">
+          <button id="likeBtn" class="btn" style="background:#222">Like</button>
+          <button id="openWatchPage" class="btn">Abrir página</button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- MODAL PLAYER -->
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="player" role="dialog" aria-modal="true">
-      <button id="closeModal" class="close-btn">✕</button>
-      <video id="playerVideo" controls></video>
-      <div class="meta">
-        <h3 id="playerTitle" style="margin:10px 0 4px 0"></h3>
-        <div id="playerDesc" style="color:var(--muted); font-size:14px"></div>
+  <!-- Login / Register modal (simple) -->
+  <div id="loginModal" class="modal">
+    <div class="player login-box" style="width:380px;max-width:94%;border-radius:12px;padding:18px;">
+      <button class="close-btn" onclick="closeAuth()">✕</button>
+      <h3 style="margin:0 0 8px 0">Iniciar sesión / Crear cuenta</h3>
+      <input id="email" type="email" placeholder="Correo" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin:8px 0">
+      <input id="password" type="password" placeholder="Contraseña" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin:8px 0">
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button id="btnLogin" class="btn" style="flex:1;background:#222">Entrar</button>
+        <button id="btnRegister" class="btn" style="flex:1">Crear</button>
       </div>
     </div>
   </div>
 
-<script type="module">
-/* ============================
-   MINI-TUBE: FIREBASE + UI
-   ============================ */
+  <script type="module">
+    import { auth, db, storage } from './firebase.js';
+    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+    import { collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-/* -------------  IMPORTANT ------------
-   PASTE your firebaseConfig object BELOW (replace the placeholder object).
-   Example:
-   const firebaseConfig = {
-     apiKey: "...",
-     authDomain: "...",
-     projectId: "...",
-     storageBucket: "...",
-     messagingSenderId: "...",
-     appId: "..."
-   };
--------------------------------------- */
+    // DOM
+    const grid = document.getElementById('grid');
+    const uploadNav = document.getElementById('uploadNav');
+    const authBtn = document.getElementById('authBtn');
+    const openLoginSmall = document.getElementById('openLoginSmall');
+    const loginModal = document.getElementById('loginModal');
+    const closeAuthBtn = document.querySelector('#loginModal .close-btn');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const btnLogin = document.getElementById('btnLogin');
+    const btnRegister = document.getElementById('btnRegister');
+    const userEmail = document.getElementById('userEmail');
 
-const firebaseConfig = {
-  // --- PASTE FIREBASE CONFIG HERE ---
-  // apiKey: "...",
-  // authDomain: "...",
-  // projectId: "...",
-  // storageBucket: "...",
-  // messagingSenderId: "...",
-  // appId: "...",
-};
+    // Auth modal controls
+    function openAuth(){ loginModal.style.display = 'flex'; loginModal.classList.add('open'); }
+    window.openAuth = openAuth;
+    function closeAuth(){ loginModal.style.display = 'none'; loginModal.classList.remove('open'); }
+    window.closeAuth = closeAuth;
 
-/* ---------- load firebase libs (modular) ---------- */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-app.js";
-import { getStorage, ref as sRef, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-storage.js";
-import { getFirestore, collection, addDoc, serverTimestamp, query, orderBy, onSnapshot, getDocs, limit } from "https://www.gstatic.com/firebasejs/9.24.0/firebase-firestore.js";
+    uploadNav.addEventListener('click', ()=> location.href = 'upload.html');
+    authBtn.addEventListener('click', openAuth);
+    openLoginSmall.addEventListener('click', openAuth);
 
-/* ---------- init ---------- */
-if (!firebaseConfig || !firebaseConfig.apiKey) {
-  alert("Pega tu firebaseConfig en index.html (busca el comentario 'PASTE FIREBASE CONFIG HERE').");
-  throw new Error("Firebase config missing");
-}
-const app = initializeApp(firebaseConfig);
-const storage = getStorage(app);
-const db = getFirestore(app);
+    // Auth actions
+    import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
+      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
-/* ---------- DOM ---------- */
-const fileInput = document.getElementById('fileInput');
-const dropZone = document.getElementById('dropZone');
-const previewArea = document.getElementById('previewArea');
-const videoPreview = document.getElementById('videoPreview');
-const thumbPreview = document.getElementById('thumbPreview');
-const regenThumb = document.getElementById('regenThumb');
-const clearBtn = document.getElementById('clearBtn');
-const uploadBtn = document.getElementById('uploadBtn');
-const progBar = document.getElementById('progBar');
-const statusText = document.getElementById('statusText');
-const titleInput = document.getElementById('title');
-const descInput = document.getElementById('description');
-const tagsInput = document.getElementById('tags');
-const grid = document.getElementById('grid');
-const empty = document.getElementById('empty');
-const search = document.getElementById('search');
-
-const modal = document.getElementById('modal');
-const closeModal = document.getElementById('closeModal');
-const playerVideo = document.getElementById('playerVideo');
-const playerTitle = document.getElementById('playerTitle');
-const playerDesc = document.getElementById('playerDesc');
-
-let currentFile = null;
-let currentThumbBlob = null;
-
-/* ---------- helpers ---------- */
-function bytesToMB(n){ return (n/1024/1024).toFixed(2) + ' MB'; }
-function showStatus(s){ statusText.textContent = s || ''; progBar.style.width = '0%'; }
-function escapeHtml(s){ if(!s) return ''; return s.replace(/[&<>"']/g, (m)=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":"&#39;"}[m])); }
-
-/* ---------- drag & file ---------- */
-['dragenter','dragover'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.add('dragover'); }));
-['dragleave','drop'].forEach(e => dropZone.addEventListener(e, ev => { ev.preventDefault(); dropZone.classList.remove('dragover'); }));
-dropZone.addEventListener('drop', e => {
-  const f = e.dataTransfer.files && e.dataTransfer.files[0];
-  handleFile(f);
-});
-dropZone.addEventListener('click', ()=> fileInput.click());
-fileInput.addEventListener('change', ()=> handleFile(fileInput.files[0]));
-
-function validFile(file){
-  if(!file) return false;
-  if(!file.type.startsWith('video')) return false;
-  // optional: limit
-  const MAX = 300 * 1024 * 1024;
-  if(file.size > MAX){ alert('Archivo demasiado grande ('+bytesToMB(file.size)+'). Máx ' + bytesToMB(MAX)); return false; }
-  return true;
-}
-
-function handleFile(file){
-  if(!validFile(file)) return;
-  currentFile = file;
-  const url = URL.createObjectURL(file);
-  videoPreview.src = url;
-  videoPreview.load();
-  previewArea.style.display = 'block';
-  showStatus('Archivo listo: ' + file.name + ' • ' + bytesToMB(file.size));
-  generateThumbnail(url, 0.7).then(blob=>{
-    currentThumbBlob = blob;
-    thumbPreview.src = URL.createObjectURL(blob);
-  }).catch(err=>{
-    console.warn('thumb fail', err);
-    thumbPreview.src = '';
-  });
-}
-
-/* ---------- generate thumbnail ---------- */
-function generateThumbnail(videoUrl, seekPercent = 0.5){
-  return new Promise((resolve, reject)=>{
-    const v = document.createElement('video');
-    v.preload = 'metadata';
-    v.src = videoUrl;
-    v.muted = true;
-    v.playsInline = true;
-    v.addEventListener('loadedmetadata', ()=>{
-      const t = Math.min(v.duration * seekPercent, Math.max(0, v.duration - 0.1));
-      v.currentTime = t;
+    btnRegister.addEventListener('click', async ()=>{
+      try{
+        await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+        alert('Cuenta creada');
+        closeAuth();
+      }catch(e){ alert(e.message); }
     });
-    v.addEventListener('seeked', ()=>{
-      const canvas = document.createElement('canvas');
-      const w = v.videoWidth || 1280;
-      const h = v.videoHeight || 720;
-      // make 16:9 thumb
-      canvas.width = Math.min(1280, w);
-      canvas.height = Math.round(canvas.width * 9 / 16);
-      const ctx = canvas.getContext('2d');
-      // center crop
-      const sx = Math.max(0, (w - canvas.width) / 2);
-      ctx.drawImage(v, sx, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-      canvas.toBlob(blob => {
-        if(!blob) return reject(new Error('no blob'));
-        resolve(blob);
-      }, 'image/jpeg', 0.85);
-    });
-    v.addEventListener('error', e => reject(e));
-  });
-}
-
-/* ---------- upload to Firebase Storage & metadata to Firestore ---------- */
-uploadBtn.addEventListener('click', async ()=>{
-  if(!currentFile) return alert('Selecciona un video primero.');
-  const title = titleInput.value.trim() || (currentFile.name || 'Sin título');
-  const desc = descInput.value.trim();
-  const tags = tagsInput.value.trim().split(',').map(t=>t.trim()).filter(Boolean);
-
-  try{
-    // 1) upload video
-    const folder = `videos/${Date.now()}_${currentFile.name.replace(/\s+/g,'_')}`;
-    const storageRef = sRef(storage, folder);
-    const uploadTask = uploadBytesResumable(storageRef, currentFile);
-
-    uploadTask.on('state_changed', (snap) => {
-      const pct = Math.round((snap.bytesTransferred / snap.totalBytes) * 100);
-      progBar.style.width = pct + '%';
-      showStatus('Subiendo... ' + pct + '%');
+    btnLogin.addEventListener('click', async ()=>{
+      try{
+        await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
+        alert('Bienvenido');
+        closeAuth();
+      }catch(e){ alert(e.message); }
     });
 
-    await new Promise((res, rej) => {
-      uploadTask.then(async (snap) => {
-        const videoUrl = await getDownloadURL(snap.ref);
-
-        // 2) upload thumbnail (if exists) to storage next to video
-        let thumbUrl = '';
-        if(currentThumbBlob){
-          const tRef = sRef(storage, folder + '_thumb.jpg');
-          const tTask = uploadBytesResumable(tRef, currentThumbBlob);
-          tTask.on('state_changed', (s) => {
-            // optional: show thumb progress
-          });
-          const tSnap = await tTask;
-          thumbUrl = await getDownloadURL(tSnap.ref);
-        }
-
-        // 3) save metadata in Firestore
-        const doc = {
-          title,
-          description: desc,
-          tags,
-          videoUrl,
-          thumbUrl,
-          size: currentFile.size,
-          createdAt: serverTimestamp()
-        };
-        await addDoc(collection(db, 'videos'), doc);
-
-        showStatus('Subida completa ✅');
-        resetUploader();
-        res();
-      }).catch(err => rej(err));
+    // Show user
+    onAuthStateChanged(auth, user=>{
+      if(user) { userEmail.textContent = user.email; authBtn.textContent = 'Salir'; authBtn.onclick = ()=> signOut(auth); }
+      else { userEmail.textContent = ''; authBtn.textContent = 'Iniciar'; authBtn.onclick = openAuth; }
     });
 
-  } catch(err){
-    console.error(err);
-    alert('Error al subir: ' + (err.message || err));
-  }
-});
+    // Load videos (realtime)
+    import { getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
-/* ---------- reset ---------- */
-function resetUploader(){
-  currentFile = null;
-  currentThumbBlob = null;
-  videoPreview.src = '';
-  thumbPreview.src = '';
-  previewArea.style.display = 'none';
-  fileInput.value = '';
-  titleInput.value = '';
-  descInput.value = '';
-  tagsInput.value = '';
-  progBar.style.width = '0%';
-  statusText.textContent = '';
-}
+    const videosCol = collection(db, 'videos');
+    const q = query(videosCol, orderBy('createdAt', 'desc'));
 
-/* ---------- clear / regen ---------- */
-clearBtn.addEventListener('click', ()=> {
-  if(confirm('Limpiar formulario?')) resetUploader();
-});
-regenThumb.addEventListener('click', ()=>{
-  if(!currentFile) return alert('Selecciona un video primero');
-  const url = URL.createObjectURL(currentFile);
-  generateThumbnail(url, 0.3).then(blob => {
-    currentThumbBlob = blob;
-    thumbPreview.src = URL.createObjectURL(blob);
-  }).catch(()=> alert('No se pudo regenerar'));
-});
+    onSnapshot(q, snapshot=>{
+      grid.innerHTML = '';
+      if(snapshot.empty){ grid.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#606060">Sin videos aún</div>'; return; }
+      snapshot.forEach(docSnap=>{
+        const d = docSnap.data();
+        const card = document.createElement('div');
+        card.className = 'video-card';
+        card.innerHTML = `
+          <img class="thumb" src="${d.thumbUrl || ''}" onerror="this.src='https://via.placeholder.com/480x270?text=No+thumb'"/>
+          <div class="v-info">
+            <div class="v-title">${d.title || 'Sin título'}</div>
+            <div class="v-meta">${d.uploaderEmail || 'Anónimo'} • ${new Date(d.createdAt?.seconds ? d.createdAt.seconds *1000 : Date.now()).toLocaleString()}</div>
+          </div>
+        `;
+        card.addEventListener('click', ()=> {
+          // abrir watch con id
+          location.href = `watch.html?id=${docSnap.id}`;
+        });
+        grid.appendChild(card);
+      });
+    });
 
-/* ---------- LISTEN realtime from Firestore ---------- */
-function renderCard(data){
-  // create card element
-  const docId = data.id;
-  const d = data.data();
-  const thumb = d.thumbUrl || d.videoUrl + '#t=2'; // fallback
-  const title = d.title || 'Sin título';
-  const desc = d.description || '';
-  const created = d.createdAt && d.createdAt.toDate ? d.createdAt.toDate().toLocaleString() : '';
+    // Simple search: client-side (filter DOM)
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    searchBtn.addEventListener('click', ()=>{
+      const q = (searchInput.value||'').toLowerCase();
+      const cards = Array.from(document.querySelectorAll('.video-card'));
+      cards.forEach(c=>{
+        c.style.display = (c.textContent||'').toLowerCase().includes(q) ? '' : 'none';
+      });
+    });
 
-  const el = document.createElement('div');
-  el.className = 'card';
-  el.innerHTML = `
-    <div class="thumb-wrap">
-      <img loading="lazy" src="${escapeHtml(thumb)}" alt="${escapeHtml(title)}" />
-    </div>
-    <div class="info">
-      <h3>${escapeHtml(title)}</h3>
-      <p>${escapeHtml(desc)}</p>
-      <div class="meta-small">${created}</div>
-    </div>
-  `;
-
-  el.addEventListener('click', ()=> openPlayer(d.videoUrl, title, desc));
-
-  return el;
-}
-
-function clearGrid(){ grid.innerHTML = ''; }
-
-/* realtime query: newest first, listen for changes */
-const videosCol = collection(db, 'videos');
-const q = query(videosCol, orderBy('createdAt', 'desc'));
-
-/* show onSnapshot (realtime) */
-onSnapshot(q, snapshot => {
-  if(snapshot.empty){
-    grid.innerHTML = '';
-    grid.appendChild(empty);
-    return;
-  }
-  // render all
-  const frag = document.createDocumentFragment();
-  snapshot.forEach(doc => {
-    const card = renderCard(doc);
-    frag.appendChild(card);
-  });
-  grid.innerHTML = '';
-  grid.appendChild(frag);
-});
-
-/* ---------- SEARCH local (client-side, simple) ---------- */
-search.addEventListener('input', (e) => {
-  const q = e.target.value.toLowerCase().trim();
-  const cards = Array.from(grid.querySelectorAll('.card'));
-  if(!q){
-    cards.forEach(c=> c.style.display = '');
-    return;
-  }
-  cards.forEach(c=>{
-    const txt = (c.textContent || '').toLowerCase();
-    c.style.display = txt.includes(q) ? '' : 'none';
-  });
-});
-
-/* ---------- PLAYER modal ---------- */
-function openPlayer(url, title, desc){
-  playerVideo.src = url;
-  playerTitle.textContent = title || '';
-  playerDesc.textContent = desc || '';
-  modal.classList.add('open');
-  modal.setAttribute('aria-hidden','false');
-  playerVideo.play().catch(()=>{ /* autoplay may be blocked */ });
-}
-function closePlayer(){
-  modal.classList.remove('open');
-  modal.setAttribute('aria-hidden','true');
-  playerVideo.pause();
-  playerVideo.src = '';
-}
-closeModal.addEventListener('click', closePlayer);
-modal.addEventListener('click', (e)=> { if(e.target === modal) closePlayer(); });
-
-/* ---------- keyboard escape to close ---------- */
-document.addEventListener('keydown', (e) => { if(e.key === 'Escape') closePlayer(); });
-
-/* ---------- initial load: fetch latest 20 (in case onSnapshot slow) ---------- */
-(async function initialLoad(){
-  try{
-    const q2 = query(videosCol, orderBy('createdAt', 'desc'), limit(20));
-    const snap = await getDocs(q2);
-    if(snap.empty) return;
-    const frag = document.createDocumentFragment();
-    snap.forEach(doc => frag.appendChild(renderCard(doc)));
-    grid.innerHTML = '';
-gris.appendChild(frag);
-}catch(err){
- console.warn('initial load err',err);
-}
-})();
-</script>
+    // Modal player (optional quick preview)
+    const modal = document.getElementById('modal');
+    const modalVideo = document.getElementById('modalVideo');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalDesc = document.getElementById('modalDesc');
+    const closePlayer = document.getElementById('closePlayer');
+    closePlayer.addEventListener('click', ()=> { modal.classList.remove('open'); modalVideo.pause(); modalVideo.src = ''; });
+    window.openPlayer = (url,title,desc)=> {
+      modal.classList.add('open');
+      modalVideo.src = url;
+      modalTitle.textContent = title;
+      modalDesc.textContent = desc;
+    };
+  </script>
 </body>
 </html>
-   
