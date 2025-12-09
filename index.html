@@ -1,196 +1,347 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Minitubee.com — Inicio</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Compra Días × Free Fire + V.I.P</title>
+<!-- Fuente Audiowide -->
+<link href="https://fonts.googleapis.com/css2?family=Audiowide&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;font-family:'Audiowide',cursive;}
+  body{
+    background: linear-gradient(135deg,#0d0d0d,#1a1a1a);
+    color:#fff;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:50px 20px;
+  }
+  h1{
+    color:#00ffea;
+    text-align:center;
+    margin-bottom:40px;
+    text-shadow:0 0 15px #00ffea;
+  }
+
+  /* Cards de paquetes */
+  .cards-container{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+    gap:20px;
+    width:100%;
+    max-width:1200px;
+    margin-bottom:50px;
+  }
+  .card{
+    background:linear-gradient(145deg,#111,#1a1a1a);
+    border:2px solid #00ffea;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+    transition:transform 0.3s,box-shadow 0.3s;
+    position:relative;
+  }
+  .card:hover{
+    transform:translateY(-8px);
+    box-shadow:0 0 20px #00ffea;
+  }
+  .robux-title{
+    font-size:24px;
+    font-weight:bold;
+    margin-bottom:10px;
+    color:#ffea00;
+  }
+  .price-row{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:10px;
+    margin-bottom:15px;
+  }
+  .price{
+    font-size:20px;
+    color:#00ffea;
+  }
+  .price.red{
+    color:red;
+    font-weight:bold;
+    animation:zoomPrice 1.5s infinite alternate;
+  }
+  @keyframes zoomPrice{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.2);}
+    100%{transform:scale(1);}
+  }
+  .btn{
+    display:block;
+    width:100%;
+    margin:5px 0;
+    padding:10px 15px;
+    background:#00ffea;
+    color:#000;
+    font-weight:bold;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    text-decoration:none;
+    transition:transform 0.2s,box-shadow 0.2s,background 0.2s;
+  }
+  .btn:hover{
+    transform:scale(1.05);
+    background:#00b3a0;
+    box-shadow:0 0 15px #00ffea,0 0 25px #00ffea;
+  }
+  .offer{
+    position:absolute;
+    top:10px;
+    right:10px;
+    background:red;
+    color:#fff;
+    font-size:12px;
+    padding:5px 8px;
+    border-radius:5px;
+    animation:zoomOffer 1.5s infinite alternate;
+  }
+  @keyframes zoomOffer{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.2);}
+    100%{transform:scale(1);}
+  }
+
+  /* Burbuja V.I.P más pequeña */
+  .vip-card{
+    position:relative;
+    background: linear-gradient(145deg,#111,#1a1a1a);
+    border:3px solid #ff00ff;
+    border-radius:50%;
+    width:120px;
+    height:120px;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    cursor:pointer;
+    box-shadow:0 0 25px #ff00ff;
+    font-weight:bold;
+    color:#ff00ff;
+    font-size:18px;
+    text-align:center;
+    animation:vipGlow 2s infinite alternate, vipBounce 2s infinite alternate;
+    margin-bottom:50px;
+    transition:transform 0.3s, box-shadow 0.3s;
+  }
+  .vip-card:hover{
+    transform:scale(1.15);
+    box-shadow:0 0 50px #ff00ff,0 0 80px #ff00ff;
+  }
+  @keyframes vipGlow{
+    0%{box-shadow:0 0 20px #ff00ff;}
+    50%{box-shadow:0 0 50px #ff00ff;}
+    100%{box-shadow:0 0 20px #ff00ff;}
+  }
+  @keyframes vipBounce{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-6px);}
+    100%{transform:translateY(0);}
+  }
+
+  /* Modal general */
+  .modal{
+    display:none;
+    position:fixed;
+    z-index:1000;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.85);
+    justify-content:center;
+    align-items:center;
+  }
+  .modal-content{
+    background:#111;
+    border:2px solid #00ffea;
+    padding:30px;
+    border-radius:15px;
+    text-align:center;
+    min-width:300px;
+    animation:fadeIn 0.3s;
+  }
+  @keyframes fadeIn{
+    from{opacity:0;transform:scale(0.8);}
+    to{opacity:1;transform:scale(1);}
+  }
+  .modal-content h2{
+    margin-bottom:15px;
+    color:#ffea00;
+    font-size:28px;
+  }
+  .modal-content h3{
+    margin-bottom:15px;
+    color:#00ffea;
+    font-size:20px;
+  }
+  .modal-content ul{
+    text-align:left;
+    margin-bottom:20px;
+    list-style:none;
+    padding-left:0;
+  }
+  .modal-content ul li{
+    margin:5px 0;
+    font-size:16px;
+  }
+  .modal-content .btn{
+    display:block;
+    width:100%;
+    margin:8px 0;
+    padding:12px;
+    background:#00ffea;
+    color:#000;
+    font-weight:bold;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    text-decoration:none;
+    transition:transform 0.2s,box-shadow 0.2s,background 0.2s;
+  }
+  .modal-content .btn:hover{
+    transform:scale(1.05);
+    background:#00b3a0;
+    box-shadow:0 0 15px #00ffea,0 0 25px #00ffea;
+  }
+  .close{
+    position:absolute;
+    top:15px;
+    right:20px;
+    font-size:28px;
+    cursor:pointer;
+    color:#ff0000;
+  }
+</style>
 </head>
 <body>
-  <header class="header">
-    <div class="logo">Minitubee<span style="font-weight:400;color:#222">.com</span></div>
 
-    <div class="searchbar">
-      <input id="searchInput" placeholder="Buscar videos, etiquetas, títulos...">
-      <button id="searchBtn" class="btn">Buscar</button>
-    </div>
+<h1>V.I.P + Compra de Días × Free Fire</h1>
 
-    <div style="display:flex;gap:8px;align-items:center">
-      <div id="userEmail" style="color:#333;font-weight:600"></div>
-      <button id="uploadNav" class="btn">Subir</button>
-      <button id="authBtn" class="btn" style="background:#222">Iniciar</button>
-    </div>
-  </header>
+<!-- Burbuja V.I.P -->
+<div class="vip-card" onclick="openModal('vipModal')">
+  V.I.P
+</div>
 
-  <main class="container">
-    <aside class="left">
-      <div class="card upload-card" style="margin-bottom:12px">
-        <h3>Bienvenido</h3>
-        <p style="color:#606060">Regístrate para subir, comentar y dar like.</p>
-        <div style="margin-top:8px">
-          <button id="openLoginSmall" class="btn" style="background:#222">Iniciar / Registrar</button>
-        </div>
-      </div>
-
-      <div class="card" style="margin-top:12px">
-        <h3>Categorías</h3>
-        <ul style="list-style:none;padding:8px 0;margin:0;color:#333">
-          <li style="padding:6px 0">Destacados</li>
-          <li style="padding:6px 0">Musica</li>
-          <li style="padding:6px 0">Gaming</li>
-          <li style="padding:6px 0">Tutoriales</li>
-        </ul>
-      </div>
-    </aside>
-
-    <section class="main">
-      <div class="toolbar">
-        <div style="font-weight:700">Explorar</div>
-        <div style="color:#606060">Últimos videos públicos</div>
-      </div>
-
-      <div id="grid" class="grid">
-        <div style="grid-column:1/-1;padding:40px;text-align:center;color:#606060">Cargando videos…</div>
-      </div>
-    </section>
-  </main>
-
-  <!-- Modal: Player -->
-  <div id="modal" class="modal" aria-hidden="true">
-    <div class="player" role="dialog" aria-modal="true" style="position:relative">
-      <button id="closePlayer" class="close-btn">✕</button>
-      <video id="modalVideo" controls></video>
-      <div class="meta">
-        <h3 id="modalTitle"></h3>
-        <p id="modalDesc" style="color:#606060"></p>
-        <div style="margin-top:8px;display:flex;gap:8px">
-          <button id="likeBtn" class="btn" style="background:#222">Like</button>
-          <button id="openWatchPage" class="btn">Abrir página</button>
-        </div>
-      </div>
-    </div>
+<!-- Cards de paquetes -->
+<div class="cards-container">
+  <div class="card">
+    <div class="robux-title">10 DAYS</div>
+    <div class="price-row"><div class="price">$5.99</div></div>
+    <button class="btn" onclick="openModal('modal10')">→ Suscribirse</button>
   </div>
-
-  <!-- Login / Register modal (simple) -->
-  <div id="loginModal" class="modal">
-    <div class="player login-box" style="width:380px;max-width:94%;border-radius:12px;padding:18px;">
-      <button class="close-btn" onclick="closeAuth()">✕</button>
-      <h3 style="margin:0 0 8px 0">Iniciar sesión / Crear cuenta</h3>
-      <input id="email" type="email" placeholder="Correo" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin:8px 0">
-      <input id="password" type="password" placeholder="Contraseña" style="width:100%;padding:10px;border-radius:8px;border:1px solid #eee;margin:8px 0">
-      <div style="display:flex;gap:8px;margin-top:8px">
-        <button id="btnLogin" class="btn" style="flex:1;background:#222">Entrar</button>
-        <button id="btnRegister" class="btn" style="flex:1">Crear</button>
-      </div>
-    </div>
+  <div class="card">
+    <div class="robux-title">20 DAYS</div>
+    <div class="price-row"><div class="price">$17.99</div></div>
+    <button class="btn" onclick="openModal('modal20')">→ Suscribirse</button>
   </div>
+  <div class="card">
+    <div class="robux-title">30 DAYS</div>
+    <div class="price-row"><div class="price">$27.99</div></div>
+    <button class="btn" onclick="openModal('modal30')">→ Suscribirse</button>
+  </div>
+  <div class="card">
+    <div class="robux-title">40 DAYS <span class="offer">Ofert limited</span></div>
+    <div class="price-row"><div class="price red">$24.99</div></div>
+    <button class="btn" onclick="openModal('modal40')">→ Suscribirse</button>
+  </div>
+  <div class="card">
+    <div class="robux-title">50 DAYS <span class="offer">Ofert limited</span></div>
+    <div class="price-row"><div class="price">$39.99</div></div>
+    <button class="btn" onclick="openModal('modal50')">→ Suscribirse</button>
+  </div>
+  <div class="card">
+    <div class="robux-title">1 AÑO <span style="font-size:14px;color:#00ffea;">(ahorra más ➕)</span></div>
+    <div class="price-row"><div class="price">$59.99</div></div>
+    <button class="btn" onclick="openModal('modal365')">→ Suscribirse</button>
+  </div>
+</div>
 
-  <script type="module">
-    import { auth, db, storage } from './firebase.js';
-    import { onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-    import { collection, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+<!-- MODALES COMPLETOS -->
+<!-- V.I.P Modal -->
+<div id="vipModal" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('vipModal')">&times;</span>
+    <h2>V.I.P</h2>
+    <h3>BENEFICIOS V.I.P</h3>
+    <ul>
+      <li>• Días ilimitados</li>
+      <li>• Rebajas en robux</li>
+      <li>• Nuevas animaciones</li>
+    </ul>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/NSLU8UMHHM84L" target="_blank">💳 Suscribirse × $3.99 / semana</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20suscribirme%20V.I.P" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    // DOM
-    const grid = document.getElementById('grid');
-    const uploadNav = document.getElementById('uploadNav');
-    const authBtn = document.getElementById('authBtn');
-    const openLoginSmall = document.getElementById('openLoginSmall');
-    const loginModal = document.getElementById('loginModal');
-    const closeAuthBtn = document.querySelector('#loginModal .close-btn');
-    const emailInput = document.getElementById('email');
-    const passwordInput = document.getElementById('password');
-    const btnLogin = document.getElementById('btnLogin');
-    const btnRegister = document.getElementById('btnRegister');
-    const userEmail = document.getElementById('userEmail');
+<!-- Paquetes modales -->
+<div id="modal10" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('modal10')">&times;</span>
+    <h2>10 DAYS</h2>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/R37UNXZ5RPBE4" target="_blank">💳 PayPal ®</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20comprar%2010%20días" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    // Auth modal controls
-    function openAuth(){ loginModal.style.display = 'flex'; loginModal.classList.add('open'); }
-    window.openAuth = openAuth;
-    function closeAuth(){ loginModal.style.display = 'none'; loginModal.classList.remove('open'); }
-    window.closeAuth = closeAuth;
+<div id="modal20" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('modal20')">&times;</span>
+    <h2>20 DAYS</h2>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/ARYYFGFLS6L6U" target="_blank">💳 PayPal ®</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20comprar%2020%20días" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    uploadNav.addEventListener('click', ()=> location.href = 'upload.html');
-    authBtn.addEventListener('click', openAuth);
-    openLoginSmall.addEventListener('click', openAuth);
+<div id="modal30" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('modal30')">&times;</span>
+    <h2>30 DAYS</h2>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/F37MCDLYYNK3N" target="_blank">💳 PayPal ®</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20comprar%2030%20días" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    // Auth actions
-    import { createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut } 
-      from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+<div id="modal40" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('modal40')">&times;</span>
+    <h2>40 DAYS</h2>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/DAQUHDLUWTSNE" target="_blank">💳 PayPal ®</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20comprar%2040%20días" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    btnRegister.addEventListener('click', async ()=>{
-      try{
-        await createUserWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-        alert('Cuenta creada');
-        closeAuth();
-      }catch(e){ alert(e.message); }
-    });
-    btnLogin.addEventListener('click', async ()=>{
-      try{
-        await signInWithEmailAndPassword(auth, emailInput.value, passwordInput.value);
-        alert('Bienvenido');
-        closeAuth();
-      }catch(e){ alert(e.message); }
-    });
+<div id="modal50" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('modal50')">&times;</span>
+    <h2>50 DAYS</h2>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/BMCXQHRZHKPYE" target="_blank">💳 PayPal ®</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20comprar%2050%20días" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    // Show user
-    onAuthStateChanged(auth, user=>{
-      if(user) { userEmail.textContent = user.email; authBtn.textContent = 'Salir'; authBtn.onclick = ()=> signOut(auth); }
-      else { userEmail.textContent = ''; authBtn.textContent = 'Iniciar'; authBtn.onclick = openAuth; }
-    });
+<div id="modal365" class="modal">
+  <div class="modal-content">
+    <span class="close" onclick="closeModal('modal365')">&times;</span>
+    <h2>1 AÑO</h2>
+    <a class="btn" href="https://www.paypal.com/ncp/payment/DDSYPDKX84EFL" target="_blank">💳 PayPal ®</a>
+    <a class="btn" href="https://wa.me/50373826693?text=Hola,%20quiero%20comprar%201 año" target="_blank">🟢 WhatsApp ©</a>
+  </div>
+</div>
 
-    // Load videos (realtime)
-    import { getDocs, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-    import { getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+<script>
+function openModal(id){document.getElementById(id).style.display='flex';}
+function closeModal(id){document.getElementById(id).style.display='none';}
+window.onclick=function(event){
+  const modals=document.querySelectorAll('.modal');
+  modals.forEach(modal=>{if(event.target==modal) modal.style.display='none';});
+}
+</script>
 
-    const videosCol = collection(db, 'videos');
-    const q = query(videosCol, orderBy('createdAt', 'desc'));
-
-    onSnapshot(q, snapshot=>{
-      grid.innerHTML = '';
-      if(snapshot.empty){ grid.innerHTML = '<div style="grid-column:1/-1;padding:40px;text-align:center;color:#606060">Sin videos aún</div>'; return; }
-      snapshot.forEach(docSnap=>{
-        const d = docSnap.data();
-        const card = document.createElement('div');
-        card.className = 'video-card';
-        card.innerHTML = `
-          <img class="thumb" src="${d.thumbUrl || ''}" onerror="this.src='https://via.placeholder.com/480x270?text=No+thumb'"/>
-          <div class="v-info">
-            <div class="v-title">${d.title || 'Sin título'}</div>
-            <div class="v-meta">${d.uploaderEmail || 'Anónimo'} • ${new Date(d.createdAt?.seconds ? d.createdAt.seconds *1000 : Date.now()).toLocaleString()}</div>
-          </div>
-        `;
-        card.addEventListener('click', ()=> {
-          // abrir watch con id
-          location.href = `watch.html?id=${docSnap.id}`;
-        });
-        grid.appendChild(card);
-      });
-    });
-
-    // Simple search: client-side (filter DOM)
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    searchBtn.addEventListener('click', ()=>{
-      const q = (searchInput.value||'').toLowerCase();
-      const cards = Array.from(document.querySelectorAll('.video-card'));
-      cards.forEach(c=>{
-        c.style.display = (c.textContent||'').toLowerCase().includes(q) ? '' : 'none';
-      });
-    });
-
-    // Modal player (optional quick preview)
-    const modal = document.getElementById('modal');
-    const modalVideo = document.getElementById('modalVideo');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalDesc = document.getElementById('modalDesc');
-    const closePlayer = document.getElementById('closePlayer');
-    closePlayer.addEventListener('click', ()=> { modal.classList.remove('open'); modalVideo.pause(); modalVideo.src = ''; });
-    window.openPlayer = (url,title,desc)=> {
-      modal.classList.add('open');
-      modalVideo.src = url;
-      modalTitle.textContent = title;
-      modalDesc.textContent = desc;
-    };
-  </script>
 </body>
 </html>
